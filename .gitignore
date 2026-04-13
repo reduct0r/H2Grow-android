@@ -1,15 +1,69 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# ==================== Gradle ====================
+.gradle/
+build/
+**/build/
+.kotlin/
+.gradle/daemon/
+.gradle/kotlin/
+
+# ==================== Local configuration ====================
 local.properties
+*.keystore
+*.jks
+keystore.properties
+signing.properties
+
+# ==================== Android Studio / IntelliJ IDEA ====================
+*.iml
+*.iws
+*.ipr
+.idea/
+.idea/compiler.xml
+.idea/gradle.xml
+.idea/misc.xml
+.idea
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/runConfigurations/
+
+# Старые и кэш-файлы IDEA
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/gradle.xml
+.idea/usage.statistics.xml
+.idea/dictionaries/
+.idea/httpRequests/
+.idea/replstate.xml
+
+# ==================== Android build outputs ====================
+*.apk
+*.aab
+*.ap_
+output-metadata.json
+captures/
+.externalNativeBuild/
+.cxx/
+*.dex
+
+# ==================== OS generated files ====================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ==================== Logs and temporary files ====================
+*.log
+*.hprof
+
+# ==================== Kotlin / Compose specific ====================
+.kotlin/
+**/.kotlin/
+
+# ==================== Other temporary ====================
+out/
+bin/
+gen/
