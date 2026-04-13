@@ -60,4 +60,15 @@ dependencies {
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    implementation(libs.kotlinx.coroutines.android)
+
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.jwtdecode)
+
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
 }
