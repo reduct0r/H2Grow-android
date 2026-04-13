@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
@@ -71,4 +73,13 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
+    // Google Tink
+    implementation(libs.tink.android)
+
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
 }

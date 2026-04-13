@@ -25,8 +25,6 @@ class MainActivity : ComponentActivity() {
                         name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
-                    TextField(modifier = Modifier.fillMaxSize()) {
-                    }
                 }
             }
         }
