@@ -82,6 +82,7 @@ dependencies {
     // Google Tink
     implementation(libs.tink.android)
 
+    // DI
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 
@@ -89,5 +90,4 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.kotlinx.serialization.core)
-
 }

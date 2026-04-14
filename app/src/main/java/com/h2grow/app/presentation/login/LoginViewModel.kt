@@ -2,7 +2,7 @@ package com.h2grow.app.presentation.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.h2grow.app.data.TokenManager
+import com.h2grow.app.data.local.TokenManager
 import com.h2grow.app.data.remote.RetrofitClient
 import com.h2grow.app.domain.model.auth.LoginRequest
 import kotlinx.coroutines.flow.MutableStateFlow
