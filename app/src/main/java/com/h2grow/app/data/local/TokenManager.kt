@@ -17,11 +17,15 @@ class TokenManager(
 ) {
     private val mutex = Mutex()
 
+    @Volatile
+    private var accessTokenCache: String? = null
+
     suspend fun saveTokens(accessToken: String, refreshToken: String) {
         authDataStore.edit { preferences ->
             preferences[PreferencesKeys.JWT_ACCESS_TOKEN] = accessToken
             preferences[PreferencesKeys.JWT_REFRESH_TOKEN] = refreshToken
         }
+        accessTokenCache = accessToken
     }
 
     val accessTokenFlow: Flow<String?> = authDataStore.data
@@ -34,7 +38,12 @@ class TokenManager(
             preferences[PreferencesKeys.JWT_REFRESH_TOKEN]
         }
 
-    suspend fun getAccessToken(): String? = authDataStore.data.first()[PreferencesKeys.JWT_ACCESS_TOKEN]
+    suspend fun getAccessToken(): String? {
+        if (accessTokenCache != null) return accessTokenCache
+        val token = authDataStore.data.first()[PreferencesKeys.JWT_ACCESS_TOKEN]
+        accessTokenCache = token
+        return token
+    }
 
     suspend fun getRefreshToken(): String? = authDataStore.data.first()[PreferencesKeys.JWT_REFRESH_TOKEN]
 
@@ -42,6 +51,7 @@ class TokenManager(
         authDataStore.edit { preferences ->
             preferences.clear()
         }
+        accessTokenCache = null
     }
 
     suspend fun refreshTokens(authApi: AuthApiService): Boolean = mutex.withLock {
