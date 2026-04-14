@@ -31,21 +31,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.h2grow.app.ui.theme.H2GrowTheme
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = LoginViewModel(),
+    viewModel: LoginViewModel = viewModel(),
     onNavigateToRegister: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+    var email by rememberSaveable  { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
