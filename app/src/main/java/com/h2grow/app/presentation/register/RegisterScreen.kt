@@ -19,7 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults.colors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -35,18 +34,21 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.h2grow.app.presentation.auth.AuthViewModelFactory
 
 
 @Composable
 fun RegisterScreen(
-    viewModel: RegisterViewModel = viewModel(),
     onRegisterSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit = {}
 ) {
+    val appContext = LocalContext.current.applicationContext
+    val viewModel: RegisterViewModel = viewModel(factory = AuthViewModelFactory(appContext))
     var passwordVisible by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
 

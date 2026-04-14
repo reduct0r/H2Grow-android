@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val tokenManager: TokenManager = TokenManager()
+    private val tokenManager: TokenManager
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
@@ -24,7 +24,7 @@ class LoginViewModel(
 
             try {
                 val request = LoginRequest(email.trim(), password)
-                val response = RetrofitClient.authApiService.login(request)
+                val response = RetrofitClient.mainApiService.login(request)
 
                 if (response.isSuccessful) {
                     response.body()?.let { authResponse ->

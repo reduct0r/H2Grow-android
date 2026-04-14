@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class RegisterViewModel(
-    private val tokenManager: TokenManager = TokenManager()
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUiState())
@@ -78,7 +78,7 @@ class RegisterViewModel(
 
             try {
                 val request = RegisterRequest(email, password)
-                val response = RetrofitClient.authApiService.register(request)
+                val response = RetrofitClient.mainApiService.register(request)
 
                 if (response.isSuccessful) {
                     response.body()?.let { authResponse ->

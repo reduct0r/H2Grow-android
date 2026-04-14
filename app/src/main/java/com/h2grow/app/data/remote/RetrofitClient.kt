@@ -1,6 +1,7 @@
 package com.h2grow.app.data.remote
 
 import com.h2grow.app.api.AuthApiService
+import com.h2grow.app.data.local.TokenManager
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -13,21 +14,54 @@ object RetrofitClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    private val okHttpClient: OkHttpClient by lazy {
+    lateinit var tokenManager: TokenManager
+
+    // ====================== REFRESH CLIENT ======================
+    private val refreshOkHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
             .build()
     }
 
-    private val retrofit: Retrofit by lazy {
+    private val refreshRetrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(okHttpClient)
+            .client(refreshOkHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
-    val authApiService: AuthApiService by lazy {
-        retrofit.create(AuthApiService::class.java)
+    val refreshAuthApiService: AuthApiService by lazy {
+        refreshRetrofit.create(AuthApiService::class.java)
+    }
+
+    // ====================== MAIN CLIENT ======================
+
+    private val mainOkHttpClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .addInterceptor(AuthInterceptor(tokenManager))
+            .authenticator(TokenAuthenticator(
+                tokenManager = tokenManager,
+                refreshApi = refreshAuthApiService,
+                onRefreshFailed = { tokenManager.clearTokens() }
+            ))
+            .build()
+    }
+
+    private val mainRetrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(mainOkHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    val mainApiService: AuthApiService by lazy {
+        mainRetrofit.create(AuthApiService::class.java)
+    }
+
+    fun initialize(tokenManager: TokenManager) {
+        this.tokenManager = tokenManager
     }
 }

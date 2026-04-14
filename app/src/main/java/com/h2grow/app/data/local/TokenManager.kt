@@ -1,13 +1,16 @@
 package com.h2grow.app.data.local
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import com.h2grow.app.api.AuthApiService
+import com.h2grow.app.data.remote.RetrofitClient.tokenManager
 import com.h2grow.app.domain.model.auth.RefreshRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -44,17 +47,22 @@ class TokenManager(
     }
 
     suspend fun refreshTokens(authApi: AuthApiService): Boolean = mutex.withLock {
-        val currentRefresh = getRefreshToken() ?: return false
+        val currentRefreshToken = getRefreshToken() ?: return false
+
         try {
-            val response = authApi.refreshToken(RefreshRequest(currentRefresh))
+            val response = authApi.refreshToken(RefreshRequest(currentRefreshToken))
+
             if (response.isSuccessful) {
                 val newTokens = response.body() ?: return false
+
                 saveTokens(newTokens.accessToken, newTokens.refreshToken)
                 return true
+            } else {
+                return false
             }
         } catch (e: Exception) {
-            throw RuntimeException(e)
+            Log.e("refreshTokens", e.message.orEmpty())
+            return false
         }
-        return false
     }
 }
