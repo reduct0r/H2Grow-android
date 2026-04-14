@@ -23,6 +23,10 @@ fun AppNavigation() {
         entryProvider = entryProvider {
             entry<Screen.Login> {
                 LoginScreen(
+                    onLoginSuccess = {
+                        backStack.clear()
+                        backStack.add(Screen.Home)
+                    },
                     onNavigateToRegister = {
                         backStack.add(Screen.Register)
                     }

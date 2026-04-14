@@ -78,7 +78,7 @@ class RegisterViewModel(
 
             try {
                 val request = RegisterRequest(email, password)
-                val response = RetrofitClient.mainApiService.register(request)
+                val response = RetrofitClient.authApiService.register(request)
 
                 if (response.isSuccessful) {
                     response.body()?.let { authResponse ->

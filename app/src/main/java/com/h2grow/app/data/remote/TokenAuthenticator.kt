@@ -1,9 +1,7 @@
 package com.h2grow.app.data.remote
 
-import android.util.Log
 import com.h2grow.app.api.AuthApiService
 import com.h2grow.app.data.local.TokenManager
-import com.h2grow.app.domain.model.auth.LogoutRequest
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
 import okhttp3.Request
@@ -17,6 +15,10 @@ class TokenAuthenticator(
 ) : Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
+        if (shouldSkipRefresh(response.request.url.encodedPath)) {
+            return null
+        }
+
         if (responseCount(response) >= 3) {
             runBlocking { onRefreshFailed() }
             return null
@@ -36,6 +38,12 @@ class TokenAuthenticator(
         return response.request.newBuilder()
             .header("Authorization", "Bearer $newAccessToken")
             .build()
+    }
+
+    private fun shouldSkipRefresh(path: String): Boolean {
+        return path.endsWith("/auth/login") ||
+            path.endsWith("/auth/register") ||
+            path.endsWith("/auth/refresh")
     }
 
     private fun responseCount(response: Response): Int {

@@ -14,7 +14,17 @@ object RetrofitClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    lateinit var tokenManager: TokenManager
+    @Volatile
+    private var initialized = false
+
+    private lateinit var tokenManager: TokenManager
+
+    private fun requireTokenManager(): TokenManager {
+        check(initialized) {
+            "RetrofitClient is not initialized. Call RetrofitClient.initialize(tokenManager) first."
+        }
+        return tokenManager
+    }
 
     // ====================== REFRESH CLIENT ======================
     private val refreshOkHttpClient: OkHttpClient by lazy {
@@ -40,11 +50,11 @@ object RetrofitClient {
     private val mainOkHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
-            .addInterceptor(AuthInterceptor(tokenManager))
+            .addInterceptor(AuthInterceptor(requireTokenManager()))
             .authenticator(TokenAuthenticator(
-                tokenManager = tokenManager,
+                tokenManager = requireTokenManager(),
                 refreshApi = refreshAuthApiService,
-                onRefreshFailed = { tokenManager.clearTokens() }
+                onRefreshFailed = { requireTokenManager().clearTokens() }
             ))
             .build()
     }
@@ -61,7 +71,14 @@ object RetrofitClient {
         mainRetrofit.create(AuthApiService::class.java)
     }
 
+    val authApiService: AuthApiService by lazy {
+        refreshRetrofit.create(AuthApiService::class.java)
+    }
+
+    @Synchronized
     fun initialize(tokenManager: TokenManager) {
+        if (initialized) return
         this.tokenManager = tokenManager
+        initialized = true
     }
 }

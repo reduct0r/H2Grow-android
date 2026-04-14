@@ -23,9 +23,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +44,7 @@ import com.h2grow.app.ui.theme.H2GrowTheme
 
 @Composable
 fun LoginScreen(
+    onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
     val appContext = LocalContext.current.applicationContext
@@ -52,6 +53,12 @@ fun LoginScreen(
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            onLoginSuccess()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -179,6 +186,7 @@ fun LoginScreen(
 fun PreviewLoginScreen() {
     H2GrowTheme {
         LoginScreen(
+            onLoginSuccess = {},
             onNavigateToRegister = {}
         )
     }
