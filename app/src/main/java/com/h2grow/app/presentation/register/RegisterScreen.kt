@@ -1,4 +1,4 @@
-package com.h2grow.app.presentation.login
+package com.h2grow.app.presentation.register
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,17 +37,32 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import com.h2grow.app.ui.theme.H2GrowTheme
+
 
 @Composable
-fun LoginScreen(
-    viewModel: LoginViewModel = LoginViewModel(),
-    onNavigateToRegister: () -> Unit
+fun RegisterScreen(
+    viewModel: RegisterViewModel = RegisterViewModel(),
+    onRegisterSuccess: () -> Unit,
+    onNavigateToLogin: () -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordConfirm by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(password) {
+        viewModel.validatePassword(password)
+    }
+    LaunchedEffect(password, passwordConfirm) {
+        viewModel.validateConfirmPassword(password, passwordConfirm)
+    }
+
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            onRegisterSuccess()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -75,8 +91,7 @@ fun LoginScreen(
                 value = email,
                 onValueChange = {
                     email = it
-                    viewModel.clearError()
-                                },
+                },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -89,55 +104,80 @@ fun LoginScreen(
                 value = password,
                 onValueChange = {
                     password = it
-                    viewModel.clearError()
-                                },
+                },
                 label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
-                visualTransformation = if (passwordVisible) {
-                    VisualTransformation.None
-                } else {
-                    PasswordVisualTransformation()
-                },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
-                    IconButton(
-                        onClick = { passwordVisible = !passwordVisible }
-                    ) {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
-                            imageVector = if (passwordVisible) {
-                                Icons.Default.Favorite
-                            } else {
-                                Icons.Default.FavoriteBorder
-                            },
-                            contentDescription = "Show password"
+                            imageVector = if (passwordVisible) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = "Toggle password visibility"
                         )
                     }
                 }
             )
 
+            uiState.passwordError?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = passwordConfirm,
+                onValueChange = {
+                    passwordConfirm = it
+                },
+                label = { Text("Confirm password") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = "Toggle password visibility"
+                        )
+                    }
+                }
+            )
+
+            uiState.confirmPasswordError?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(
                 onClick = {
-                    viewModel.login(email, password)
+                    viewModel.register(email, password)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank(),
+                enabled = !uiState.isLoading &&
+                        email.isNotBlank() &&
+                        password.isNotBlank() &&
+                        passwordConfirm.isNotBlank() &&
+                        uiState.passwordError == null &&
+                        uiState.confirmPasswordError == null
             ) {
                 if (uiState.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
                 } else {
-                    Text(
-                        text = "Войти",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Text(text = "Зарегистрироваться", fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 }
             }
 
@@ -157,9 +197,9 @@ fun LoginScreen(
                     text = "Don't have an account?",
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                TextButton(onClick = { onNavigateToRegister() }) {
+                TextButton(onClick = { }) {
                     Text(
-                        text = "Sign in",
+                        text = "Sing in",
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Medium
                     )
@@ -169,12 +209,11 @@ fun LoginScreen(
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
 fun PreviewLoginScreen() {
-    H2GrowTheme {
-        LoginScreen(
-            onNavigateToRegister = {}
-        )
-    }
+    RegisterScreen(
+        onNavigateToLogin = {},
+        onRegisterSuccess = {}
+    )
 }
