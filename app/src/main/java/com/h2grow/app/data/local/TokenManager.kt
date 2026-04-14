@@ -40,7 +40,13 @@ class TokenManager(
 
     suspend fun getRefreshToken(): String? {
         val encrypted = authDataStore.data.first()[PreferencesKeys.JWT_REFRESH_TOKEN] ?: return null
-        return encryptor.decrypt(encrypted)
+        return try {
+            encryptor.decrypt(encrypted)
+        } catch (e: SecurityException) {
+            Log.w("TokenManager", "Failed to decrypt refresh token, clearing stored tokens", e)
+            clearTokens()
+            null
+        }
     }
 
     suspend fun clearTokens() {

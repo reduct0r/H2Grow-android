@@ -49,8 +49,12 @@ class TokenEncryptor(private val context: Context) {
 
     fun decrypt(encryptedBase64: String): String {
         return try {
-            val encryptedBytes = android.util.Base64.decode(encryptedBase64, android.util.Base64.NO_WRAP)
-            val decryptedBytes = aead.decrypt(encryptedBytes, ASSOCIATED_DATA)
+            val encryptedBytes = android.util.Base64.decode(encryptedBase64, android.util.Base64.DEFAULT)
+            val decryptedBytes = try {
+                aead.decrypt(encryptedBytes, ASSOCIATED_DATA)
+            } catch (_: GeneralSecurityException) {
+                aead.decrypt(encryptedBytes, null)
+            }
             String(decryptedBytes, Charsets.UTF_8)
         } catch (e: GeneralSecurityException) {
             throw SecurityException("Error decrypting refresh token. The token may be damaged or the key has been changed", e)
