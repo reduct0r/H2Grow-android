@@ -25,38 +25,29 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 
 @Composable
 fun RegisterScreen(
-    viewModel: RegisterViewModel = RegisterViewModel(),
+    viewModel: RegisterViewModel = viewModel(),
     onRegisterSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit = {}
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordConfirm by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(password) {
-        viewModel.validatePassword(password)
-    }
-    LaunchedEffect(password, passwordConfirm) {
-        viewModel.validateConfirmPassword(password, passwordConfirm)
-    }
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
@@ -88,9 +79,9 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             OutlinedTextField(
-                value = email,
+                value = viewModel.email,
                 onValueChange = {
-                    email = it
+                    viewModel.onEmailChanged(it)
                 },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
@@ -101,9 +92,9 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = password,
+                value = viewModel.password,
                 onValueChange = {
-                    password = it
+                    viewModel.onPasswordChanged(it)
                 },
                 label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
@@ -131,9 +122,9 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = passwordConfirm,
+                value = viewModel.passwordConfirm,
                 onValueChange = {
-                    passwordConfirm = it
+                    viewModel.onPasswordConfirmChanged(it)
                 },
                 label = { Text("Confirm password") },
                 modifier = Modifier.fillMaxWidth(),
@@ -162,15 +153,15 @@ fun RegisterScreen(
 
             Button(
                 onClick = {
-                    viewModel.register(email, password)
+                    viewModel.register()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 enabled = !uiState.isLoading &&
-                        email.isNotBlank() &&
-                        password.isNotBlank() &&
-                        passwordConfirm.isNotBlank() &&
+                        viewModel.email.isNotBlank() &&
+                        viewModel.password.isNotBlank() &&
+                        viewModel.passwordConfirm.isNotBlank() &&
                         uiState.passwordError == null &&
                         uiState.confirmPasswordError == null
             ) {
@@ -197,7 +188,7 @@ fun RegisterScreen(
                     text = "Don't have an account?",
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                TextButton(onClick = { }) {
+                TextButton(onClick = onNavigateToLogin) {
                     Text(
                         text = "Sing in",
                         color = MaterialTheme.colorScheme.primary,
