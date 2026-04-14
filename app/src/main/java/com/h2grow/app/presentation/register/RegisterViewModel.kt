@@ -29,13 +29,11 @@ class RegisterViewModel(
 
     fun onEmailChanged(newEmail: String) {
         email = newEmail
-        // Можно добавить валидацию email здесь при необходимости
     }
 
     fun onPasswordChanged(newPassword: String) {
         password = newPassword
         validatePassword(newPassword)
-        // Автоматически проверяем подтверждение, если оно уже введено
         validateConfirmPassword(newPassword, passwordConfirm)
     }
 
@@ -57,7 +55,7 @@ class RegisterViewModel(
             errors.add("The password must contain at least one number")
         }
         if (password.isNotEmpty() && !password.any { !it.isLetterOrDigit() }) {
-            errors.add("The password must contain at least one special character")
+            errors.add("The password must contain at least one special char")
         }
 
         val errorMessage = if (errors.isEmpty()) null else errors.first()

@@ -1,5 +1,6 @@
 package com.h2grow.app.presentation.login
 
+import android.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.OutlinedTextFieldDefaults.colors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -136,7 +139,7 @@ fun LoginScreen(
                     )
                 } else {
                     Text(
-                        text = "Войти",
+                        text = "Sign in",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -161,7 +164,7 @@ fun LoginScreen(
                 )
                 TextButton(onClick = { onNavigateToRegister() }) {
                     Text(
-                        text = "Sign in",
+                        text = "Sign up",
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Medium
                     )
