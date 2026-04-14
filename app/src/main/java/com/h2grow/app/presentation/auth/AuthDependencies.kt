@@ -3,6 +3,7 @@ package com.h2grow.app.presentation.auth
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.h2grow.app.data.local.TokenEncryptor
 import com.h2grow.app.data.local.TokenManager
 import com.h2grow.app.data.local.authDataStore
 import com.h2grow.app.data.remote.RetrofitClient
@@ -15,7 +16,10 @@ object AuthDependencies {
 
     fun tokenManager(context: Context): TokenManager {
         return tokenManagerInstance ?: synchronized(this) {
-            tokenManagerInstance ?: TokenManager(context.applicationContext.authDataStore).also {
+            tokenManagerInstance ?: TokenManager(
+                authDataStore = context.applicationContext.authDataStore,
+                encryptor = TokenEncryptor(context.applicationContext)
+            ).also {
                 RetrofitClient.initialize(it)
                 tokenManagerInstance = it
             }

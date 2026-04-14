@@ -13,7 +13,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 class TokenManager(
-    private val authDataStore: DataStore<Preferences>
+    private val authDataStore: DataStore<Preferences>,
+    private val encryptor: TokenEncryptor
 ) {
     private val mutex = Mutex()
 
@@ -22,21 +23,13 @@ class TokenManager(
 
     suspend fun saveTokens(accessToken: String, refreshToken: String) {
         authDataStore.edit { preferences ->
+            val encryptedRefreshToken = encryptor.encrypt(refreshToken)
+
             preferences[PreferencesKeys.JWT_ACCESS_TOKEN] = accessToken
-            preferences[PreferencesKeys.JWT_REFRESH_TOKEN] = refreshToken
+            preferences[PreferencesKeys.JWT_REFRESH_TOKEN] = encryptedRefreshToken
         }
         accessTokenCache = accessToken
     }
-
-    val accessTokenFlow: Flow<String?> = authDataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.JWT_ACCESS_TOKEN]
-        }
-
-    val refreshTokenFlow: Flow<String?> = authDataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.JWT_REFRESH_TOKEN]
-        }
 
     suspend fun getAccessToken(): String? {
         if (accessTokenCache != null) return accessTokenCache
@@ -45,7 +38,10 @@ class TokenManager(
         return token
     }
 
-    suspend fun getRefreshToken(): String? = authDataStore.data.first()[PreferencesKeys.JWT_REFRESH_TOKEN]
+    suspend fun getRefreshToken(): String? {
+        val encrypted = authDataStore.data.first()[PreferencesKeys.JWT_REFRESH_TOKEN] ?: return null
+        return encryptor.decrypt(encrypted)
+    }
 
     suspend fun clearTokens() {
         authDataStore.edit { preferences ->
