@@ -5,12 +5,16 @@ import androidx.lifecycle.viewModelScope
 import com.h2grow.app.data.local.TokenManager
 import com.h2grow.app.data.remote.RetrofitClient
 import com.h2grow.app.domain.model.auth.LoginRequest
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class LoginViewModel(
-    private val tokenManager: TokenManager
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val tokenManager: TokenManager,
+    private val retrofitClient: RetrofitClient
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
@@ -24,7 +28,7 @@ class LoginViewModel(
 
             try {
                 val request = LoginRequest(email.trim(), password)
-                val response = RetrofitClient.authApiService.login(request)
+                val response = retrofitClient.authApiService.login(request)
 
                 if (response.isSuccessful) {
                     response.body()?.let { authResponse ->

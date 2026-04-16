@@ -24,13 +24,19 @@ class TokenAuthenticator(
             return null
         }
 
-        val refreshSucceeded = runBlocking {
+        val refreshStatus = runBlocking {
             tokenManager.refreshTokens(refreshApi)
         }
 
-        if (!refreshSucceeded) {
-            runBlocking { onRefreshFailed() }
-            return null
+        when (refreshStatus) {
+            TokenManager.RefreshStatus.Success -> Unit
+            TokenManager.RefreshStatus.InvalidToken -> {
+                runBlocking { onRefreshFailed() }
+                return null
+            }
+            TokenManager.RefreshStatus.NetworkError -> {
+                return null
+            }
         }
 
         val newAccessToken = runBlocking { tokenManager.getAccessToken() } ?: return null

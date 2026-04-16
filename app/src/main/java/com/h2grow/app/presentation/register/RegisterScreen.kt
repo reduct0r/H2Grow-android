@@ -39,16 +39,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.h2grow.app.presentation.auth.AuthViewModelFactory
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 
 @Composable
 fun RegisterScreen(
+    viewModel: RegisterViewModel,
     onRegisterSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit = {}
 ) {
-    val appContext = LocalContext.current.applicationContext
-    val viewModel: RegisterViewModel = viewModel(factory = AuthViewModelFactory(appContext))
     var passwordVisible by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
 
@@ -207,6 +206,7 @@ fun RegisterScreen(
 @Composable
 fun PreviewLoginScreen() {
     RegisterScreen(
+        viewModel = hiltViewModel(),
         onNavigateToLogin = {},
         onRegisterSuccess = {}
     )

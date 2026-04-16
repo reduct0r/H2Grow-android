@@ -38,17 +38,16 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.h2grow.app.presentation.auth.AuthViewModelFactory
 import com.h2grow.app.ui.theme.H2GrowTheme
 
 @Composable
 fun LoginScreen(
+    viewModel: LoginViewModel,
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
-    val appContext = LocalContext.current.applicationContext
-    val viewModel: LoginViewModel = viewModel(factory = AuthViewModelFactory(appContext))
     var email by rememberSaveable  { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
@@ -186,6 +185,7 @@ fun LoginScreen(
 fun PreviewLoginScreen() {
     H2GrowTheme {
         LoginScreen(
+            viewModel = hiltViewModel(),
             onLoginSuccess = {},
             onNavigateToRegister = {}
         )

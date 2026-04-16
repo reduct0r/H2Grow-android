@@ -5,9 +5,15 @@ import com.google.crypto.tink.Aead
 import com.google.crypto.tink.KeyTemplates
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import com.google.crypto.tink.RegistryConfiguration
+import dagger.hilt.android.qualifiers.ApplicationContext
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.security.GeneralSecurityException
 
-class TokenEncryptor(private val context: Context) {
+@Singleton
+class TokenEncryptor @Inject constructor(
+    @param:ApplicationContext private val context: Context
+) {
 
     companion object {
         private const val KEYSET_NAME = "tink_refresh_keyset"

@@ -5,17 +5,25 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import com.h2grow.app.api.AuthApiService
+import com.h2grow.app.data.remote.RetrofitClient
 import com.h2grow.app.domain.model.auth.RefreshRequest
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-class TokenManager(
+class TokenManager @Inject constructor(
     private val authDataStore: DataStore<Preferences>,
     private val encryptor: TokenEncryptor
 ) {
+    sealed class RefreshStatus {
+        data object Success : RefreshStatus()
+        data object InvalidToken : RefreshStatus()
+        data object NetworkError : RefreshStatus()
+    }
+
     private val mutex = Mutex()
 
     @Volatile
@@ -56,23 +64,27 @@ class TokenManager(
         accessTokenCache = null
     }
 
-    suspend fun refreshTokens(authApi: AuthApiService): Boolean = mutex.withLock {
-        val currentRefreshToken = getRefreshToken() ?: return false
+    suspend fun refreshTokens(authApi: AuthApiService): RefreshStatus = mutex.withLock {
+        val currentRefreshToken = getRefreshToken() ?: return RefreshStatus.InvalidToken
 
         try {
             val response = authApi.refreshToken(RefreshRequest(currentRefreshToken))
 
             if (response.isSuccessful) {
-                val newTokens = response.body() ?: return false
+                val newTokens = response.body() ?: return RefreshStatus.InvalidToken
 
                 saveTokens(newTokens.accessToken, newTokens.refreshToken)
-                return true
+                return RefreshStatus.Success
             } else {
-                return false
+                return if (response.code() == 401 || response.code() == 403) {
+                    RefreshStatus.InvalidToken
+                } else {
+                    RefreshStatus.NetworkError
+                }
             }
         } catch (e: Exception) {
             Log.e("refreshTokens", e.message.orEmpty())
-            return false
+            return RefreshStatus.NetworkError
         }
     }
 }

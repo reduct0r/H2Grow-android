@@ -2,13 +2,20 @@ package com.h2grow.app.data.remote
 
 import com.h2grow.app.api.AuthApiService
 import com.h2grow.app.data.local.TokenManager
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:8080/api/"
+@Singleton
+class RetrofitClient @Inject constructor(
+    private val tokenManager: TokenManager
+) {
+    companion object {
+        private const val BASE_URL = "http://10.0.2.2:8080/api/"
+    }
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -16,8 +23,6 @@ object RetrofitClient {
 
     @Volatile
     private var initialized = false
-
-    private lateinit var tokenManager: TokenManager
 
     private fun requireTokenManager(): TokenManager {
         check(initialized) {
@@ -73,12 +78,5 @@ object RetrofitClient {
 
     val authApiService: AuthApiService by lazy {
         refreshRetrofit.create(AuthApiService::class.java)
-    }
-
-    @Synchronized
-    fun initialize(tokenManager: TokenManager) {
-        if (initialized) return
-        this.tokenManager = tokenManager
-        initialized = true
     }
 }

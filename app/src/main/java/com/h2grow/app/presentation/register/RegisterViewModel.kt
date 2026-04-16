@@ -12,9 +12,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RegisterViewModel(
-    private val tokenManager: TokenManager
+class RegisterViewModel @Inject constructor(
+    private val tokenManager: TokenManager,
+    private val retrofitClient: RetrofitClient
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUiState())
@@ -78,7 +80,7 @@ class RegisterViewModel(
 
             try {
                 val request = RegisterRequest(email, password)
-                val response = RetrofitClient.authApiService.register(request)
+                val response = retrofitClient.authApiService.register(request)
 
                 if (response.isSuccessful) {
                     response.body()?.let { authResponse ->
