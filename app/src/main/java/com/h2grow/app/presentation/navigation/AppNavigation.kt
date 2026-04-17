@@ -7,31 +7,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation3.runtime.NavBackStack
-import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.h2grow.app.data.remote.RetrofitClient
 import com.h2grow.app.presentation.login.LoginScreen
 import com.h2grow.app.presentation.register.RegisterScreen
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.compose.rememberNavController
-import com.h2grow.app.data.local.TokenManager
 import com.h2grow.app.presentation.login.LoginViewModel
 import com.h2grow.app.presentation.main.AuthStateViewModel
 import com.h2grow.app.presentation.main.InitialScreenState
@@ -42,16 +32,26 @@ fun AppNavigation() {
     val authStateViewModel: AuthStateViewModel = hiltViewModel()
 
     val screenState by authStateViewModel.initialScreenState.collectAsState()
+    val backStack = rememberNavBackStack(Screen.Initial)
+
+    LaunchedEffect(screenState) {
+        when (screenState) {
+            is InitialScreenState.Login -> {
+                backStack.clear()
+                backStack.add(Screen.Login)
+            }
+            is InitialScreenState.Home -> {
+                backStack.clear()
+                backStack.add(Screen.Home)
+            }
+            else -> {}
+        }
+
+    }
 
     when (screenState) {
-
         is InitialScreenState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            InitialScreen()
         }
 
         is InitialScreenState.NoConnection -> {
@@ -60,16 +60,7 @@ fun AppNavigation() {
             )
         }
 
-        is InitialScreenState.Login,
-        is InitialScreenState.Home -> {
-
-            val startScreen = when (screenState) {
-                is InitialScreenState.Login -> Screen.Login
-                is InitialScreenState.Home -> Screen.Home
-                else -> Screen.Login
-            }
-            val backStack = rememberNavBackStack(startScreen)
-
+        else -> {
             NavDisplay(
                 backStack = backStack,
                 onBack = { backStack.removeLastOrNull() },
@@ -109,6 +100,10 @@ fun AppNavigation() {
                             style = MaterialTheme.typography.headlineMedium
                         )
                     }
+
+                    entry<Screen.Initial> {
+                        InitialScreen()
+                    }
                 }
             )
         }
@@ -128,5 +123,15 @@ fun NoConnectionScreen(onRetry: () -> Unit) {
                 Text("Retry")
             }
         }
+    }
+}
+
+@Composable
+fun InitialScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
