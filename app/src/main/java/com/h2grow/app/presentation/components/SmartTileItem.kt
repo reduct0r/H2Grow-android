@@ -11,10 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,6 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -61,11 +66,26 @@ fun SmartTileItem(
                 .padding(12.dp),
             horizontalAlignment  = Alignment.Start,
         ) {
-            Text(
-                text = tile.title.orEmpty(),
-                fontSize = 24.sp
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                tile.icon?.let { iconId ->
+                    Icon(
+                        painter = painterResource(id = iconId),
+                        contentDescription = null,
+                        modifier = Modifier.size(50.dp),
+                    )
+                }
 
+                Text(
+                    text = tile.title.orEmpty(),
+                    fontSize = 24.sp,
+                    modifier = Modifier.padding(start = 12.dp),
+                    softWrap = false
+                )
+            }
             when (tile) {
                 is SmartTile.Info -> {
                     Column(
@@ -87,6 +107,7 @@ fun SmartTileItem(
                                     append(" ${tile.unit}")
                                 }
                             }
+
                             Text(
                                 text = annotatedString,
                                 modifier = Modifier.fillMaxWidth(),
@@ -103,9 +124,27 @@ fun SmartTileItem(
                     }
                 }
 
-                is SmartTile.Dimmer -> {}
+                is SmartTile.Toggle -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                            ) {
 
-                is SmartTile.Toggle -> {}
+                            Switch(
+                                checked  = tile.isOn,
+                                onCheckedChange = { newValue -> onAction(TileAction.Toggle(tile.id, newValue)) }
+
+                            )
+                        }
+                    }
+                }
+
+                is SmartTile.Dimmer -> {}
             }
 
         }
@@ -114,14 +153,29 @@ fun SmartTileItem(
 
 @Preview
 @Composable
-fun PreviewSmartTileItem(){
+fun PreviewSmartTileItemInfo(){
     SmartTileItem(
-        tile =             SmartTile.Info(
+        tile = SmartTile.Info(
             id = "0",
             title = "Air Temperature",
             value = "15.2",
             unit = "°C",
             icon = R.drawable.ic_launcher_foreground
+        ),
+        onAction = { }
+    )
+}
+
+@Preview
+@Composable
+fun PreviewSmartTileItemToggle() {
+    SmartTileItem(
+        tile = SmartTile.Toggle(
+            id = "1",
+            title = "Light Switsh",
+            isOn = false,
+            needConfirm = true,
+            icon = R.drawable.ic_launcher_background
         ),
         onAction = { }
     )
