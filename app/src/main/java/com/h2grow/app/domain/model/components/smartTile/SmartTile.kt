@@ -25,8 +25,8 @@ sealed interface SmartTile {
         override val id: String,
         override val title: String?,
         val value: Double,
-        val maxValue: Double = 0.0,
-        val minValue: Double = 100.0,
+        val maxValue: Double = 100.0,
+        val minValue: Double = 0.0,
         val unit: String = "%",
         override val icon: Int,
         val needConfirm: Boolean = false

@@ -1,6 +1,5 @@
 package com.h2grow.app.presentation.components
 
-import android.widget.SeekBar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,13 +21,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.SliderState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,7 +39,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.h2grow.app.R
@@ -57,7 +54,7 @@ fun SmartTileItem(
     modifier: Modifier = Modifier
 ) {
     var multiplier by remember { mutableFloatStateOf(1f) }
-    var sliderValue by remember { mutableFloatStateOf(0f) }
+    var sliderValue by remember(tile.id) { mutableFloatStateOf(0f) }
 
     Card(
         modifier = modifier
@@ -164,7 +161,9 @@ fun SmartTileItem(
                 }
 
                 is SmartTile.Dimmer -> {
-                    sliderValue = tile.value.toFloat()
+                    LaunchedEffect(tile.id, tile.value) {
+                        sliderValue = tile.value.toFloat()
+                    }
 
                     Column(
                         modifier = modifier.fillMaxSize(),
@@ -178,7 +177,7 @@ fun SmartTileItem(
                         ) {
                             Text(
                                 modifier = modifier.padding(10.dp),
-                                text = sliderValue.toString(),
+                                text = sliderValue.toInt().toString(),
                                 fontSize = 30.sp
                             )
                             Text(
@@ -196,10 +195,12 @@ fun SmartTileItem(
                             Slider(
                                 value = sliderValue,
                                 onValueChange = { newValue ->
-                                    onAction(SetLevel(tile.id, newValue.toDouble()))
                                     sliderValue = newValue
                                 },
-                                valueRange = tile.maxValue.toFloat()..tile.minValue.toFloat(),
+                                onValueChangeFinished = {
+                                    onAction(SetLevel(tile.id, sliderValue.toDouble()))
+                                },
+                                valueRange = tile.minValue.toFloat()..tile.maxValue.toFloat(),
                                 steps = 100,
                                 modifier = Modifier
                                     .fillMaxWidth(),
