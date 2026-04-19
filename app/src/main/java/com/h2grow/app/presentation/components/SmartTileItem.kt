@@ -2,6 +2,7 @@ package com.h2grow.app.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -68,33 +70,54 @@ fun SmartTileItem(
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            horizontalAlignment  = Alignment.Start,
+        BoxWithConstraints(
+            modifier = modifier.fillMaxSize()
         ) {
-            Row(
+            val scale = (maxWidth / 188.dp).coerceIn(0.62f, 1.1f)
+            val scaledPadding = 8.dp * scale
+            val contentPadding = if (scaledPadding < 4.dp) 4.dp else scaledPadding
+            val scaledIconSize = 50.dp * scale
+            val iconSize = if (scaledIconSize < 24.dp) 24.dp else scaledIconSize
+            val scaledTitleFontSize = 24.sp * scale
+            val titleFontSize = if (scaledTitleFontSize < 12.sp) 12.sp else scaledTitleFontSize
+            val scaledValueFontSize = 30.sp * scale
+            val valueFontSize = if (scaledValueFontSize < 14.sp) 14.sp else scaledValueFontSize
+            val scaledSwitchLabelFontSize = 20.sp * scale
+            val switchLabelFontSize = if (scaledSwitchLabelFontSize < 12.sp) 12.sp else scaledSwitchLabelFontSize
+
+            Column(
                 modifier = modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .padding(contentPadding),
+                horizontalAlignment = Alignment.Start,
             ) {
-                tile.icon?.let { iconId ->
-                    Icon(
-                        painter = painterResource(id = iconId),
-                        contentDescription = null,
-                        modifier = modifier.size(50.dp),
+                Row(
+                    modifier = modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    tile.icon?.let { iconId ->
+                        Icon(
+                            painter = painterResource(id = iconId),
+                            contentDescription = null,
+                            modifier = modifier.size(iconSize),
+                        )
+                    }
+
+                    val scaledTitleStartPadding = 12.dp * scale
+                    Text(
+                        text = tile.title.orEmpty(),
+                        fontSize = titleFontSize,
+                        modifier = modifier
+                            .padding(start = if (scaledTitleStartPadding < 4.dp) 4.dp else scaledTitleStartPadding)
+                            .weight(1f),
+                        softWrap = false,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                Text(
-                    text = tile.title.orEmpty(),
-                    fontSize = 24.sp,
-                    modifier = modifier.padding(start = 12.dp),
-                    softWrap = false
-                )
-            }
-            when (tile) {
+                when (tile) {
                 is SmartTile.Info -> {
                     Column(
                         modifier = modifier.fillMaxHeight(),
@@ -108,10 +131,10 @@ fun SmartTileItem(
                         ) {
 
                             val annotatedString = buildAnnotatedString {
-                                withStyle(style = SpanStyle(fontSize = 100.sp * multiplier)) {
+                                withStyle(style = SpanStyle(fontSize = (100.sp * scale) * multiplier)) {
                                     append(tile.value)
                                 }
-                                withStyle(style = SpanStyle(fontSize = 70.sp * multiplier)) {
+                                withStyle(style = SpanStyle(fontSize = (70.sp * scale) * multiplier)) {
                                     append(" ${tile.unit}")
                                 }
                             }
@@ -154,7 +177,7 @@ fun SmartTileItem(
                             Text(
                                 modifier = modifier.padding(start = 8.dp),
                                 text = if (tile.isOn) "On" else "Off",
-                                fontSize = 20.sp
+                                fontSize = switchLabelFontSize
                             )
                         }
                     }
@@ -175,14 +198,15 @@ fun SmartTileItem(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
+                            val scaledValuePadding = 10.dp * scale
                             Text(
-                                modifier = modifier.padding(10.dp),
+                                modifier = modifier.padding(if (scaledValuePadding < 4.dp) 4.dp else scaledValuePadding),
                                 text = sliderValue.toInt().toString(),
-                                fontSize = 30.sp
+                                fontSize = valueFontSize
                             )
                             Text(
                                 text = tile.unit,
-                                fontSize = 30.sp
+                                fontSize = valueFontSize
                             )
                         }
 
@@ -217,8 +241,9 @@ fun SmartTileItem(
                 }
 
                 is SmartTile.EmptyAdd -> TODO()
-            }
+                }
 
+            }
         }
     }
 }
