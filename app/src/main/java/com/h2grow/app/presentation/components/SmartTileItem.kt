@@ -1,5 +1,6 @@
 package com.h2grow.app.presentation.components
 
+import android.widget.SeekBar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,8 +17,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +48,7 @@ import com.h2grow.app.R
 import com.h2grow.app.domain.model.components.smartTile.SmartTile
 import com.h2grow.app.domain.model.components.smartTile.TileAction
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmartTileItem(
     tile: SmartTile,
@@ -50,6 +56,7 @@ fun SmartTileItem(
     modifier: Modifier = Modifier
 ) {
     var multiplier by remember { mutableFloatStateOf(1f) }
+    var sliderValue by remember { mutableFloatStateOf(0f) }
 
     Card(
         modifier = modifier
@@ -64,13 +71,13 @@ fun SmartTileItem(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
-                .padding(12.dp),
+                .padding(8.dp),
             horizontalAlignment  = Alignment.Start,
         ) {
             Row(
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -78,26 +85,26 @@ fun SmartTileItem(
                     Icon(
                         painter = painterResource(id = iconId),
                         contentDescription = null,
-                        modifier = Modifier.size(50.dp),
+                        modifier = modifier.size(50.dp),
                     )
                 }
 
                 Text(
                     text = tile.title.orEmpty(),
                     fontSize = 24.sp,
-                    modifier = Modifier.padding(start = 12.dp),
+                    modifier = modifier.padding(start = 12.dp),
                     softWrap = false
                 )
             }
             when (tile) {
                 is SmartTile.Info -> {
                     Column(
-                        modifier = Modifier.fillMaxHeight(),
+                        modifier = modifier.fillMaxHeight(),
                         verticalArrangement = Arrangement.Center
                     ) {
 
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
@@ -113,7 +120,7 @@ fun SmartTileItem(
 
                             Text(
                                 text = annotatedString,
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
                                 softWrap = false,
                                 maxLines = 1,
@@ -129,12 +136,12 @@ fun SmartTileItem(
 
                 is SmartTile.Toggle -> {
                     Column(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         Row(
-                            modifier = Modifier
+                            modifier = modifier
                                 .fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
@@ -147,7 +154,7 @@ fun SmartTileItem(
                             )
 
                             Text(
-                                modifier = Modifier.padding(start = 8.dp),
+                                modifier = modifier.padding(start = 8.dp),
                                 text = if (tile.isOn) "On" else "Off",
                                 fontSize = 20.sp
                             )
@@ -156,6 +163,45 @@ fun SmartTileItem(
                 }
 
                 is SmartTile.Dimmer -> {
+                    sliderValue = tile.value.toFloat()
+
+                    Column(
+                        modifier = modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
+
+                        Text(
+                            modifier = modifier.padding(10.dp),
+                            text = sliderValue.toString(),
+                            fontSize = 30.sp
+                        )
+
+                        Row(
+                            modifier = modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+
+                            Slider(
+                                value = sliderValue,
+                                onValueChange = { newValue ->
+                                    onAction(TileAction.SetLevel(tile.id, newValue.toDouble()))
+                                    sliderValue = newValue
+                                },
+                                valueRange = tile.maxValue.toFloat()..tile.minValue.toFloat(),
+                                steps = 100,
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                colors = SliderDefaults.colors(
+                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    activeTickColor = MaterialTheme.colorScheme.primary
+                                )
+                            )
+                        }
+                    }
 
                 }
             }
@@ -189,6 +235,20 @@ fun PreviewSmartTileItemToggle() {
             isOn = false,
             needConfirm = true,
             icon = R.drawable.ic_launcher_background
+        ),
+        onAction = { }
+    )
+}
+
+@Preview
+@Composable
+fun PreviewSmartTileItemDimmer() {
+    SmartTileItem(
+        tile = SmartTile.Dimmer(
+            id = "1",
+            title = "Light Dimmer",
+            value = 50.0,
+            icon = R.drawable.ic_launcher_foreground,
         ),
         onAction = { }
     )

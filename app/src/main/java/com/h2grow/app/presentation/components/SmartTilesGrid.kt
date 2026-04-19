@@ -62,6 +62,12 @@ fun PreviewSmartTilesGrid() {
                 title = "test22",
                 icon = R.drawable.ic_launcher_foreground,
                 isOn = false
+            ),
+            SmartTile.Dimmer(
+                id = "4",
+                title = "test22",
+                icon = R.drawable.ic_launcher_foreground,
+                value = 50.0,
             )
         ),
         onAction = {}
