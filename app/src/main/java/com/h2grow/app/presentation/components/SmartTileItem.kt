@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import com.h2grow.app.R
 import com.h2grow.app.domain.model.components.smartTile.SmartTile
 import com.h2grow.app.domain.model.components.smartTile.TileAction
+import com.h2grow.app.domain.model.components.smartTile.TileAction.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,7 +150,7 @@ fun SmartTileItem(
 
                             Switch(
                                 checked  = tile.isOn,
-                                onCheckedChange = { newValue -> onAction(TileAction.Toggle(tile.id, newValue)) }
+                                onCheckedChange = { newValue -> onAction(Toggle(tile.id, newValue)) }
 
                             )
 
@@ -170,12 +171,21 @@ fun SmartTileItem(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Top
                     ) {
-
-                        Text(
-                            modifier = modifier.padding(10.dp),
-                            text = sliderValue.toString(),
-                            fontSize = 30.sp
-                        )
+                        Row(
+                            modifier = modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                modifier = modifier.padding(10.dp),
+                                text = sliderValue.toString(),
+                                fontSize = 30.sp
+                            )
+                            Text(
+                                text = tile.unit,
+                                fontSize = 30.sp
+                            )
+                        }
 
                         Row(
                             modifier = modifier.fillMaxWidth(),
@@ -186,7 +196,7 @@ fun SmartTileItem(
                             Slider(
                                 value = sliderValue,
                                 onValueChange = { newValue ->
-                                    onAction(TileAction.SetLevel(tile.id, newValue.toDouble()))
+                                    onAction(SetLevel(tile.id, newValue.toDouble()))
                                     sliderValue = newValue
                                 },
                                 valueRange = tile.maxValue.toFloat()..tile.minValue.toFloat(),
@@ -204,6 +214,8 @@ fun SmartTileItem(
                     }
 
                 }
+
+                is SmartTile.EmptyAdd -> TODO()
             }
 
         }

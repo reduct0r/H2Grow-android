@@ -31,4 +31,10 @@ sealed interface SmartTile {
         override val icon: Int,
         val needConfirm: Boolean = false
     ): SmartTile
+
+    data class EmptyAdd(
+        override val id: String,
+        override val title: String? = "Click to add a smart tile",
+        override val icon: Int,
+    ): SmartTile
 }
