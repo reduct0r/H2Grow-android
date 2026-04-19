@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -21,6 +22,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,13 +49,14 @@ fun SmartTileItem(
     onAction: (TileAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var multiplier by remember { mutableStateOf(1f) }
+    var multiplier by remember { mutableFloatStateOf(1f) }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .aspectRatio(1.2f)
+            .aspectRatio(1.15f)
+            .padding(8.dp)
             .clickable { onAction(TileAction.OpenDetails(tile.id)) },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -144,7 +147,9 @@ fun SmartTileItem(
                     }
                 }
 
-                is SmartTile.Dimmer -> {}
+                is SmartTile.Dimmer -> {
+
+                }
             }
 
         }
@@ -172,7 +177,7 @@ fun PreviewSmartTileItemToggle() {
     SmartTileItem(
         tile = SmartTile.Toggle(
             id = "1",
-            title = "Light Switsh",
+            title = "Light Switch",
             isOn = false,
             needConfirm = true,
             icon = R.drawable.ic_launcher_background

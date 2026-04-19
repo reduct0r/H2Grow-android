@@ -1,5 +1,7 @@
 package com.h2grow.app.presentation.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -16,7 +18,10 @@ fun SmartTilesGrid(
     onAction: (TileAction) -> Unit
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 128.dp)
+        columns = GridCells.Adaptive(minSize = 188.dp),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(
             items = tiles,
@@ -28,7 +33,12 @@ fun SmartTilesGrid(
 }
 
 
-@Preview
+@Preview(
+    name = "SmartTilesGrid ",
+    showSystemUi = true,
+    device = "spec:width=411dp,height=891dp,dpi=420,orientation=portrait",
+    showBackground = true
+)
 @Composable
 fun PreviewSmartTilesGrid() {
     SmartTilesGrid(
@@ -39,7 +49,21 @@ fun PreviewSmartTilesGrid() {
                 value = "55.2",
                 unit = "PPM",
                 icon = R.drawable.ic_launcher_foreground
-        )
+            ),
+            SmartTile.Info(
+                id = "2",
+                title = "test",
+                value = "55.2",
+                unit = "PPM",
+                icon = R.drawable.ic_launcher_foreground
+            ),
+            SmartTile.Info(
+                id = "3",
+                title = "test22",
+                value = "55.2",
+                unit = "PPM",
+                icon = R.drawable.ic_launcher_foreground
+            )
         ),
         onAction = {}
     )
