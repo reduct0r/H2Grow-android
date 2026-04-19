@@ -134,14 +134,22 @@ fun SmartTileItem(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
                             ) {
 
                             Switch(
                                 checked  = tile.isOn,
                                 onCheckedChange = { newValue -> onAction(TileAction.Toggle(tile.id, newValue)) }
 
+                            )
+
+                            Text(
+                                modifier = Modifier.padding(start = 8.dp),
+                                text = if (tile.isOn) "On" else "Off",
+                                fontSize = 20.sp
                             )
                         }
                     }

@@ -57,12 +57,11 @@ fun PreviewSmartTilesGrid() {
                 unit = "PPM",
                 icon = R.drawable.ic_launcher_foreground
             ),
-            SmartTile.Info(
+            SmartTile.Toggle(
                 id = "3",
                 title = "test22",
-                value = "55.2",
-                unit = "PPM",
-                icon = R.drawable.ic_launcher_foreground
+                icon = R.drawable.ic_launcher_foreground,
+                isOn = false
             )
         ),
         onAction = {}
