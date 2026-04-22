@@ -46,8 +46,8 @@ import androidx.compose.ui.unit.sp
 import com.h2grow.app.R
 import com.h2grow.app.domain.model.components.smartTile.SmartTile
 import com.h2grow.app.domain.model.components.smartTile.TileAction
-import com.h2grow.app.domain.model.components.smartTile.TileAction.*
 
+@Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmartTileItem(
@@ -118,131 +118,132 @@ fun SmartTileItem(
                 }
 
                 when (tile) {
-                is SmartTile.Info -> {
-                    Column(
-                        modifier = modifier.fillMaxHeight(),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-
-                        Row(
-                            modifier = modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                    is SmartTile.Info -> {
+                        Column(
+                            modifier = modifier.fillMaxHeight(),
+                            verticalArrangement = Arrangement.Center
                         ) {
 
-                            val annotatedString = buildAnnotatedString {
-                                withStyle(style = SpanStyle(fontSize = (100.sp * scale) * multiplier)) {
-                                    append(tile.value)
-                                }
-                                withStyle(style = SpanStyle(fontSize = (70.sp * scale) * multiplier)) {
-                                    append(" ${tile.unit}")
-                                }
-                            }
-
-                            Text(
-                                text = annotatedString,
+                            Row(
                                 modifier = modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center,
-                                softWrap = false,
-                                maxLines = 1,
-                                onTextLayout = { textLayoutResult ->
-                                    if (textLayoutResult.hasVisualOverflow) {
-                                        multiplier *= 0.65f
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-
-                is SmartTile.Toggle -> {
-                    Column(
-                        modifier = modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Row(
-                            modifier = modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
                             ) {
 
-                            Switch(
-                                checked  = tile.isOn,
-                                onCheckedChange = { newValue -> onAction(Toggle(tile.id, newValue)) }
+                                val annotatedString = buildAnnotatedString {
+                                    withStyle(style = SpanStyle(fontSize = (100.sp * scale) * multiplier)) {
+                                        append(tile.value)
+                                    }
+                                    withStyle(style = SpanStyle(fontSize = (70.sp * scale) * multiplier)) {
+                                        append(" ${tile.unit}")
+                                    }
+                                }
 
-                            )
-
-                            Text(
-                                modifier = modifier.padding(start = 8.dp),
-                                text = if (tile.isOn) "On" else "Off",
-                                fontSize = switchLabelFontSize
-                            )
-                        }
-                    }
-                }
-
-                is SmartTile.Dimmer -> {
-                    LaunchedEffect(tile.id, tile.value) {
-                        sliderValue = tile.value.toFloat()
-                    }
-
-                    Column(
-                        modifier = modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Top
-                    ) {
-                        Row(
-                            modifier = modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            val scaledValuePadding = 10.dp * scale
-                            Text(
-                                modifier = modifier.padding(if (scaledValuePadding < 4.dp) 4.dp else scaledValuePadding),
-                                text = sliderValue.toInt().toString(),
-                                fontSize = valueFontSize
-                            )
-                            Text(
-                                text = tile.unit,
-                                fontSize = valueFontSize
-                            )
-                        }
-
-                        Row(
-                            modifier = modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-
-                            Slider(
-                                value = sliderValue,
-                                onValueChange = { newValue ->
-                                    sliderValue = newValue
-                                },
-                                onValueChangeFinished = {
-                                    onAction(SetLevel(tile.id, sliderValue.toDouble()))
-                                },
-                                valueRange = tile.minValue.toFloat()..tile.maxValue.toFloat(),
-                                steps = 100,
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                colors = SliderDefaults.colors(
-                                    thumbColor = MaterialTheme.colorScheme.primary,
-                                    activeTrackColor = MaterialTheme.colorScheme.primary,
-                                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    activeTickColor = MaterialTheme.colorScheme.primary
+                                Text(
+                                    text = annotatedString,
+                                    modifier = modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                    softWrap = false,
+                                    maxLines = 1,
+                                    onTextLayout = { textLayoutResult ->
+                                        if (textLayoutResult.hasVisualOverflow) {
+                                            multiplier *= 0.65f
+                                        }
+                                    }
                                 )
-                            )
+                            }
                         }
                     }
 
-                }
+                    is SmartTile.Toggle -> {
+                        Column(
+                            modifier = modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Row(
+                                modifier = modifier
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                                ) {
 
-                is SmartTile.EmptyAdd -> TODO()
-                }
+                                Switch(
+                                    checked  = tile.isOn,
+                                    onCheckedChange = { newValue -> onAction(
+                                        TileAction.Toggle(
+                                            tile.id,
+                                            newValue
+                                        )
+                                    ) }
 
+                                )
+
+                                Text(
+                                    modifier = modifier.padding(start = 8.dp),
+                                    text = if (tile.isOn) "On" else "Off",
+                                    fontSize = switchLabelFontSize
+                                )
+                            }
+                        }
+                    }
+
+                    is SmartTile.Dimmer -> {
+                        LaunchedEffect(tile.id, tile.value) {
+                            sliderValue = tile.value.toFloat()
+                        }
+
+                        Column(
+                            modifier = modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            Row(
+                                modifier = modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                val scaledValuePadding = 10.dp * scale
+                                Text(
+                                    modifier = modifier.padding(if (scaledValuePadding < 4.dp) 4.dp else scaledValuePadding),
+                                    text = sliderValue.toInt().toString(),
+                                    fontSize = valueFontSize
+                                )
+                                Text(
+                                    text = tile.unit,
+                                    fontSize = valueFontSize
+                                )
+                            }
+
+                            Row(
+                                modifier = modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+
+                                Slider(
+                                    value = sliderValue,
+                                    onValueChange = { newValue ->
+                                        sliderValue = newValue
+                                    },
+                                    onValueChangeFinished = {
+                                        onAction(TileAction.SetLevel(tile.id, sliderValue.toDouble()))
+                                    },
+                                    valueRange = tile.minValue.toFloat()..tile.maxValue.toFloat(),
+                                    steps = 100,
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = MaterialTheme.colorScheme.primary,
+                                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                                        inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        activeTickColor = MaterialTheme.colorScheme.primary
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

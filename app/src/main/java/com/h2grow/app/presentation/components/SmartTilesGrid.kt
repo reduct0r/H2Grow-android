@@ -18,7 +18,7 @@ fun SmartTilesGrid(
     onAction: (TileAction) -> Unit
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 100.dp),
+        columns = GridCells.Adaptive(minSize = 188.dp),
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -45,13 +45,6 @@ fun PreviewSmartTilesGrid() {
         tiles = listOf(
             SmartTile.Info(
                 id = "0",
-                title = "test",
-                value = "55.2",
-                unit = "PPM",
-                icon = R.drawable.ic_launcher_foreground
-            ),
-            SmartTile.Info(
-                id = "2",
                 title = "test",
                 value = "55.2",
                 unit = "PPM",
