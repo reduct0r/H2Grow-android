@@ -1,6 +1,5 @@
 package com.h2grow.app.presentation.register
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,22 +32,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
-
 @Composable
-fun RegisterScreen(
-    viewModel: RegisterViewModel,
+fun RegisterRoute(
+    viewModel: RegisterViewModel = hiltViewModel(),
     onRegisterSuccess: () -> Unit,
-    onNavigateToLogin: () -> Unit = {}
+    onNavigateToLogin: () -> Unit
 ) {
-    var passwordVisible by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState.isSuccess) {
@@ -57,34 +51,59 @@ fun RegisterScreen(
         }
     }
 
+    RegisterScreen(
+        uiState = uiState,
+        email = viewModel.email,
+        password = viewModel.password,
+        passwordConfirm = viewModel.passwordConfirm,
+        onEmailChanged = viewModel::onEmailChanged,
+        onPasswordChanged = viewModel::onPasswordChanged,
+        onPasswordConfirmChanged = viewModel::onPasswordConfirmChanged,
+        onRegisterClick = viewModel::register,
+        onNavigateToLogin = onNavigateToLogin
+    )
+}
+
+@Composable
+fun RegisterScreen(
+    uiState: RegisterUiState,
+    email: String,
+    password: String,
+    passwordConfirm: String,
+    onEmailChanged: (String) -> Unit,
+    onPasswordChanged: (String) -> Unit,
+    onPasswordConfirmChanged: (String) -> Unit,
+    onRegisterClick: () -> Unit,
+    onNavigateToLogin: () -> Unit
+) {
+    var passwordVisible by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues = paddingValues)
+                .padding(paddingValues)
                 .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Spacer(modifier = Modifier.height(200.dp))
 
             Text(
                 text = "H2Grow",
                 style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.SemiBold
             )
 
             Spacer(modifier = Modifier.height(30.dp))
 
             OutlinedTextField(
-                value = viewModel.email,
-                onValueChange = {
-                    viewModel.onEmailChanged(it)
-                },
+                value = email,
+                onValueChange = onEmailChanged,
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -94,17 +113,20 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = viewModel.password,
-                onValueChange = {
-                    viewModel.onPasswordChanged(it)
-                },
+                value = password,
+                onValueChange = onPasswordChanged,
                 label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible)
+                    VisualTransformation.None
+                else
+                    PasswordVisualTransformation(),
                 trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    IconButton(
+                        onClick = { passwordVisible = !passwordVisible }
+                    ) {
                         Icon(
                             imageVector = if (passwordVisible) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Toggle password visibility"
@@ -114,100 +136,79 @@ fun RegisterScreen(
             )
 
             uiState.passwordError?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text(it, color = MaterialTheme.colorScheme.error)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = viewModel.passwordConfirm,
-                onValueChange = {
-                    viewModel.onPasswordConfirmChanged(it)
-                },
+                value = passwordConfirm,
+                onValueChange = onPasswordConfirmChanged,
                 label = { Text("Confirm password") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = "Toggle password visibility"
-                        )
-                    }
-                }
+                visualTransformation = if (passwordVisible)
+                    VisualTransformation.None
+                else
+                    PasswordVisualTransformation()
             )
 
             uiState.confirmPasswordError?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text(it, color = MaterialTheme.colorScheme.error)
             }
 
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(
-                onClick = {
-                    viewModel.register()
-                },
+                onClick = onRegisterClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 enabled = !uiState.isLoading &&
-                        viewModel.email.isNotBlank() &&
-                        viewModel.password.isNotBlank() &&
-                        viewModel.passwordConfirm.isNotBlank() &&
+                        email.isNotBlank() &&
+                        password.isNotBlank() &&
+                        passwordConfirm.isNotBlank() &&
                         uiState.passwordError == null &&
                         uiState.confirmPasswordError == null
             ) {
+
                 if (uiState.isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp)
+                    )
                 } else {
-                    Text(text = "Sign up", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                    Text("Sign up")
                 }
             }
 
             uiState.errorMessage?.let {
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text(it, color = MaterialTheme.colorScheme.error)
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Already have an account?",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Already have an account?")
                 TextButton(onClick = onNavigateToLogin) {
-                    Text(
-                        text = "Sing in",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Text("Sign in")
                 }
             }
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun PreviewLoginScreen() {
+fun RegisterScreenPreview() {
     RegisterScreen(
-        viewModel = hiltViewModel(),
-        onNavigateToLogin = {},
-        onRegisterSuccess = {}
+        uiState = RegisterUiState(),
+        email = "",
+        password = "",
+        passwordConfirm = "",
+        onEmailChanged = {},
+        onPasswordChanged = {},
+        onPasswordConfirmChanged = {},
+        onRegisterClick = {},
+        onNavigateToLogin = {}
     )
 }
