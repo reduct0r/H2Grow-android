@@ -14,13 +14,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class AuthStateViewModel @Inject constructor(
+class AuthRootViewModel @Inject constructor(
     private val tokenManager: TokenManager,
     private val retrofitClient: RetrofitClient
 ) : ViewModel() {
 
-    private val _initialScreenState = MutableStateFlow<InitialScreenState>(InitialScreenState.Loading)
-    val initialScreenState: StateFlow<InitialScreenState> = _initialScreenState.asStateFlow()
+    private val _uiState = MutableStateFlow<MainUiState>(MainUiState.Loading)
+    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
     init {
         checkInitialScreen()
@@ -28,28 +28,30 @@ class AuthStateViewModel @Inject constructor(
 
     private fun checkInitialScreen() {
         viewModelScope.launch {
-            _initialScreenState.value = InitialScreenState.Loading
+            _uiState.value = MainUiState.Loading
 
             try {
                 val refreshToken = tokenManager.getRefreshToken()
                 if (refreshToken.isNullOrBlank()) {
-                    _initialScreenState.value = InitialScreenState.Login
+                    _uiState.value = MainUiState.Unauthenticated
                     return@launch
                 }
 
                 val refreshStatus = tokenManager.refreshTokens(retrofitClient.refreshAuthApiService)
 
-                _initialScreenState.value = when (refreshStatus) {
-                    RefreshStatus.Success -> InitialScreenState.Home
+                _uiState.value = when (refreshStatus) {
+                    RefreshStatus.Success -> MainUiState.Authenticated
+
                     RefreshStatus.InvalidToken -> {
                         tokenManager.clearTokens()
-                        InitialScreenState.Login
+                        MainUiState.Unauthenticated
                     }
-                    RefreshStatus.NetworkError -> InitialScreenState.NoConnection
+
+                    RefreshStatus.NetworkError -> MainUiState.NoConnection
                 }
 
             } catch (e: Exception) {
-                _initialScreenState.value = InitialScreenState.NoConnection
+                _uiState.value = MainUiState.NoConnection
                 Log.e("AuthState", "Failed to check initial screen", e)
             }
         }
@@ -58,5 +60,8 @@ class AuthStateViewModel @Inject constructor(
     fun retry() {
         checkInitialScreen()
     }
-}
 
+    fun onLoginSuccess() {
+        _uiState.value = MainUiState.Authenticated
+    }
+}

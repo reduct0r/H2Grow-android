@@ -8,11 +8,13 @@ import com.h2grow.app.api.AuthApiService
 import com.h2grow.app.data.remote.RetrofitClient
 import com.h2grow.app.domain.model.auth.RefreshRequest
 import jakarta.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 class TokenManager @Inject constructor(
     private val authDataStore: DataStore<Preferences>,
@@ -39,23 +41,31 @@ class TokenManager @Inject constructor(
         accessTokenCache = accessToken
     }
 
-    suspend fun getAccessToken(): String? {
-        if (accessTokenCache != null) return accessTokenCache
-        val token = authDataStore.data.first()[PreferencesKeys.JWT_ACCESS_TOKEN]
-        accessTokenCache = token
-        return token
-    }
+    suspend fun getAccessToken(): String? =
+        withContext(Dispatchers.IO) {
+            if (accessTokenCache != null) return@withContext accessTokenCache
 
-    suspend fun getRefreshToken(): String? {
-        val encrypted = authDataStore.data.first()[PreferencesKeys.JWT_REFRESH_TOKEN] ?: return null
-        return try {
-            encryptor.decrypt(encrypted)
-        } catch (e: SecurityException) {
-            Log.w("TokenManager", "Failed to decrypt refresh token, clearing stored tokens", e)
-            clearTokens()
-            null
+            val token =
+                authDataStore.data.first()[PreferencesKeys.JWT_ACCESS_TOKEN]
+
+            accessTokenCache = token
+            token
         }
-    }
+
+    suspend fun getRefreshToken(): String? =
+        withContext(Dispatchers.IO) {
+            val encrypted =
+                authDataStore.data.first()[PreferencesKeys.JWT_REFRESH_TOKEN]
+                    ?: return@withContext null
+
+            try {
+                encryptor.decrypt(encrypted)
+            } catch (e: SecurityException) {
+                Log.w("TokenManager", "decrypt failed", e)
+                clearTokens()
+                null
+            }
+        }
 
     suspend fun clearTokens() {
         authDataStore.edit { preferences ->
@@ -64,27 +74,36 @@ class TokenManager @Inject constructor(
         accessTokenCache = null
     }
 
-    suspend fun refreshTokens(authApi: AuthApiService): RefreshStatus = mutex.withLock {
-        val currentRefreshToken = getRefreshToken() ?: return RefreshStatus.InvalidToken
+    suspend fun refreshTokens(authApi: AuthApiService): RefreshStatus =
+        withContext(Dispatchers.IO) {
 
-        try {
-            val response = authApi.refreshToken(RefreshRequest(currentRefreshToken))
+            val currentRefreshToken = getRefreshToken()
+                ?: return@withContext RefreshStatus.InvalidToken
 
-            if (response.isSuccessful) {
-                val newTokens = response.body() ?: return RefreshStatus.InvalidToken
+            mutex.withLock {
+                try {
+                    val response = authApi.refreshToken(
+                        RefreshRequest(currentRefreshToken)
+                    )
 
-                saveTokens(newTokens.accessToken, newTokens.refreshToken)
-                return RefreshStatus.Success
-            } else {
-                return if (response.code() == 401 || response.code() == 403) {
-                    RefreshStatus.InvalidToken
-                } else {
+                    if (response.isSuccessful) {
+                        val newTokens = response.body()
+                            ?: return@withContext RefreshStatus.InvalidToken
+
+                        saveTokens(newTokens.accessToken, newTokens.refreshToken)
+                        RefreshStatus.Success
+                    } else {
+                        if (response.code() == 401 || response.code() == 403) {
+                            RefreshStatus.InvalidToken
+                        } else {
+                            RefreshStatus.NetworkError
+                        }
+                    }
+
+                } catch (e: Exception) {
+                    Log.e("TokenManager", "refresh failed", e)
                     RefreshStatus.NetworkError
                 }
             }
-        } catch (e: Exception) {
-            Log.e("refreshTokens", e.message.orEmpty())
-            return RefreshStatus.NetworkError
         }
-    }
 }

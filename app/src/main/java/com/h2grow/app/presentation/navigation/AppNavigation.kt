@@ -18,95 +18,94 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.h2grow.app.presentation.login.LoginScreen
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.h2grow.app.presentation.login.LoginRoute
 import com.h2grow.app.presentation.login.LoginViewModel
-import com.h2grow.app.presentation.main.AuthStateViewModel
-import com.h2grow.app.presentation.main.InitialScreenState
+import com.h2grow.app.presentation.main.AuthRootViewModel
+import com.h2grow.app.presentation.main.AuthState
 import com.h2grow.app.presentation.register.RegisterRoute
 
-@Composable
-fun AppNavigation() {
-    val authStateViewModel: AuthStateViewModel = hiltViewModel()
-
-    val screenState by authStateViewModel.initialScreenState.collectAsState()
-    val backStack = rememberNavBackStack(Screen.Initial)
-
-    LaunchedEffect(screenState) {
-        when (screenState) {
-            is InitialScreenState.Login -> {
-                backStack.clear()
-                backStack.add(Screen.Login)
-            }
-            is InitialScreenState.Home -> {
-                backStack.clear()
-                backStack.add(Screen.Home)
-            }
-            else -> {}
-        }
-
-    }
-
-    when (screenState) {
-        is InitialScreenState.Loading -> {
-            InitialScreen()
-        }
-
-        is InitialScreenState.NoConnection -> {
-            NoConnectionScreen(
-                onRetry = { authStateViewModel.retry() }
-            )
-        }
-
-        else -> {
-            NavDisplay(
-                backStack = backStack,
-                onBack = { backStack.removeLastOrNull() },
-                entryProvider = entryProvider {
-                    entry<Screen.Login> {
-                        val loginViewModel: LoginViewModel = hiltViewModel()
-                        LoginRoute(
-                            viewModel = loginViewModel,
-                            onLoginSuccess = {
-                                backStack.clear()
-                                backStack.add(Screen.Home)
-                            },
-                            onNavigateToRegister = {
-                                backStack.add(Screen.Register)
-                            }
-                        )
-                    }
-
-                    entry<Screen.Register> {
-                        RegisterRoute(
-                            onRegisterSuccess = {
-                                backStack.clear()
-                                backStack.add(Screen.Home)
-                            },
-                            onNavigateToLogin = {
-                                backStack.removeLastOrNull()
-                            }
-                        )
-                    }
-
-                    entry<Screen.Home> {
-                        Text(
-                            text = "Home",
-                            modifier = Modifier.fillMaxSize(),
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                    }
-
-                    entry<Screen.Initial> {
-                        InitialScreen()
-                    }
-                }
-            )
-        }
-    }
-}
+//@Composable
+//fun AppNavigation() {
+//    val authRootViewModel: AuthRootViewModel = hiltViewModel()
+//
+//    val screenState by authRootViewModel.authState.collectAsState()
+//    val backStack = rememberNavBackStack(Screen.Initial)
+//
+//    LaunchedEffect(screenState) {
+//        when (screenState) {
+//            is AuthState.Login -> {
+//                backStack.clear()
+//                backStack.add(Screen.Login)
+//            }
+//            is AuthState.Home -> {
+//                backStack.clear()
+//                backStack.add(Screen.Home)
+//            }
+//            else -> {}
+//        }
+//
+//    }
+//
+//    when (screenState) {
+//        is AuthState.Loading -> {
+//            LoadingScreen()
+//        }
+//
+//        is AuthState.NoConnection -> {
+//            NoConnectionScreen(
+//                onRetry = { authRootViewModel.retry() }
+//            )
+//        }
+//
+//        else -> {
+//            NavDisplay(
+//                backStack = backStack,
+//                onBack = { backStack.removeLastOrNull() },
+//                entryProvider = entryProvider {
+//                    entry<Screen.Login> {
+//                        val loginViewModel: LoginViewModel = hiltViewModel()
+//                        LoginRoute(
+//                            viewModel = loginViewModel,
+//                            onLoginSuccess = {
+//                                backStack.clear()
+//                                backStack.add(Screen.Home)
+//                            },
+//                            onNavigateToRegister = {
+//                                backStack.add(Screen.Register)
+//                            }
+//                        )
+//                    }
+//
+//                    entry<Screen.Register> {
+//                        RegisterRoute(
+//                            onRegisterSuccess = {
+//                                backStack.clear()
+//                                backStack.add(Screen.Home)
+//                            },
+//                            onNavigateToLogin = {
+//                                backStack.removeLastOrNull()
+//                            }
+//                        )
+//                    }
+//
+//                    entry<Screen.Home> {
+//                        Text(
+//                            text = "Home",
+//                            modifier = Modifier.fillMaxSize(),
+//                            style = MaterialTheme.typography.headlineMedium
+//                        )
+//                    }
+//
+//                    entry<Screen.Initial> {
+//                        LoadingScreen()
+//                    }
+//                }
+//            )
+//        }
+//    }
+//}
 
 @Composable
 fun NoConnectionScreen(onRetry: () -> Unit) {
@@ -125,7 +124,7 @@ fun NoConnectionScreen(onRetry: () -> Unit) {
 }
 
 @Composable
-fun InitialScreen() {
+fun LoadingScreen() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
