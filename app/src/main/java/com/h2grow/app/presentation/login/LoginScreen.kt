@@ -37,20 +37,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.h2grow.app.ui.theme.H2GrowTheme
 
 @Composable
-fun LoginScreen(
-    viewModel: LoginViewModel,
+fun LoginRoute(
+    viewModel: LoginViewModel = hiltViewModel(),
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
-    var email by rememberSaveable  { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
-    var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState.isSuccess) {
@@ -58,6 +54,26 @@ fun LoginScreen(
             onLoginSuccess()
         }
     }
+
+    LoginScreen(
+        uiState = uiState,
+        onNavigateToRegister = onNavigateToRegister,
+        onLoginClick = viewModel::login,
+        onEmailChanged = viewModel::onEmailChanged,
+        onPasswordChanged = viewModel::onPasswordChanged
+    )
+}
+
+@Composable
+fun LoginScreen(
+    uiState: LoginUiState,
+    onNavigateToRegister: () -> Unit,
+    onLoginClick: () -> Unit,
+    onEmailChanged: (String) -> Unit,
+    onPasswordChanged: (String) -> Unit
+)
+{
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -83,11 +99,8 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             OutlinedTextField(
-                value = email,
-                onValueChange = {
-                    email = it
-                    viewModel.clearError()
-                                },
+                value = uiState.email,
+                onValueChange = { onEmailChanged(it) },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -97,11 +110,8 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = password,
-                onValueChange = {
-                    password = it
-                    viewModel.clearError()
-                                },
+                value = uiState.password,
+                onValueChange = { onPasswordChanged(it) },
                 label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -131,12 +141,12 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    viewModel.login(email, password)
+                    onLoginClick()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank(),
+                enabled = !uiState.isLoading && uiState.email.isNotBlank() && uiState.password.isNotBlank(),
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
@@ -185,9 +195,11 @@ fun LoginScreen(
 fun PreviewLoginScreen() {
     H2GrowTheme {
         LoginScreen(
-            viewModel = hiltViewModel(),
-            onLoginSuccess = {},
-            onNavigateToRegister = {}
+            uiState = LoginUiState(),
+            onNavigateToRegister = {},
+            onLoginClick = {},
+            onEmailChanged = {},
+            onPasswordChanged = {}
         )
     }
 }

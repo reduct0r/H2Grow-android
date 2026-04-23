@@ -53,9 +53,6 @@ fun RegisterRoute(
 
     RegisterScreen(
         uiState = uiState,
-        email = viewModel.email,
-        password = viewModel.password,
-        passwordConfirm = viewModel.passwordConfirm,
         onEmailChanged = viewModel::onEmailChanged,
         onPasswordChanged = viewModel::onPasswordChanged,
         onPasswordConfirmChanged = viewModel::onPasswordConfirmChanged,
@@ -67,9 +64,6 @@ fun RegisterRoute(
 @Composable
 fun RegisterScreen(
     uiState: RegisterUiState,
-    email: String,
-    password: String,
-    passwordConfirm: String,
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onPasswordConfirmChanged: (String) -> Unit,
@@ -102,7 +96,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             OutlinedTextField(
-                value = email,
+                value = uiState.email,
                 onValueChange = onEmailChanged,
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
@@ -113,7 +107,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = password,
+                value = uiState.password,
                 onValueChange = onPasswordChanged,
                 label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
@@ -142,7 +136,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = passwordConfirm,
+                value = uiState.passwordConfirm,
                 onValueChange = onPasswordConfirmChanged,
                 label = { Text("Confirm password") },
                 modifier = Modifier.fillMaxWidth(),
@@ -166,9 +160,9 @@ fun RegisterScreen(
                     .fillMaxWidth()
                     .height(56.dp),
                 enabled = !uiState.isLoading &&
-                        email.isNotBlank() &&
-                        password.isNotBlank() &&
-                        passwordConfirm.isNotBlank() &&
+                        uiState.email.isNotBlank() &&
+                        uiState.password.isNotBlank() &&
+                        uiState.passwordConfirm.isNotBlank() &&
                         uiState.passwordError == null &&
                         uiState.confirmPasswordError == null
             ) {
@@ -202,9 +196,6 @@ fun RegisterScreen(
 fun RegisterScreenPreview() {
     RegisterScreen(
         uiState = RegisterUiState(),
-        email = "",
-        password = "",
-        passwordConfirm = "",
         onEmailChanged = {},
         onPasswordChanged = {},
         onPasswordConfirmChanged = {},

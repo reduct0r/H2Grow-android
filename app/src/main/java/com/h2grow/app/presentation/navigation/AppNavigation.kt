@@ -19,13 +19,13 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.h2grow.app.presentation.login.LoginScreen
-import com.h2grow.app.presentation.register.RegisterScreen
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.h2grow.app.presentation.login.LoginRoute
 import com.h2grow.app.presentation.login.LoginViewModel
 import com.h2grow.app.presentation.main.AuthStateViewModel
 import com.h2grow.app.presentation.main.InitialScreenState
-import com.h2grow.app.presentation.register.RegisterViewModel
+import com.h2grow.app.presentation.register.RegisterRoute
 
 @Composable
 fun AppNavigation() {
@@ -67,7 +67,7 @@ fun AppNavigation() {
                 entryProvider = entryProvider {
                     entry<Screen.Login> {
                         val loginViewModel: LoginViewModel = hiltViewModel()
-                        LoginScreen(
+                        LoginRoute(
                             viewModel = loginViewModel,
                             onLoginSuccess = {
                                 backStack.clear()
@@ -80,9 +80,7 @@ fun AppNavigation() {
                     }
 
                     entry<Screen.Register> {
-                        val registerViewModel: RegisterViewModel = hiltViewModel()
-                        RegisterScreen(
-                            viewModel = registerViewModel,
+                        RegisterRoute(
                             onRegisterSuccess = {
                                 backStack.clear()
                                 backStack.add(Screen.Home)

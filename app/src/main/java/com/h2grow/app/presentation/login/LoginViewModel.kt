@@ -9,6 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -19,15 +20,34 @@ class LoginViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun login(email: String, password: String) {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isLoading = true,
+    fun onEmailChanged(newEmail: String) {
+        _uiState.update {
+            it.copy(
+                email = newEmail,
                 errorMessage = null
             )
+        }
+    }
 
+    fun onPasswordChanged(newPassword: String) {
+        _uiState.update {
+            it.copy(
+                password = newPassword,
+                errorMessage = null
+            )
+        }
+    }
+
+    fun login() {
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = null
+                )
+            }
             try {
-                val request = LoginRequest(email.trim(), password)
+                val request = LoginRequest(_uiState.value.email.trim(), _uiState.value.password)
                 val response = retrofitClient.authApiService.login(request)
 
                 if (response.isSuccessful) {
@@ -37,27 +57,30 @@ class LoginViewModel @Inject constructor(
                             authResponse.refreshToken
                         )
 
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            isSuccess = true
-                        )
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                isSuccess = true
+                            )
+                        }
                     }
                 } else {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        errorMessage = "Incorrect login or password"
-                    )
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Incorrect login or password"
+                        )
+                    }
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    errorMessage = "Server connection error"
-                )
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Server connection error"
+                    )
+                }
             }
         }
     }
 
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(errorMessage = null)
-    }
 }

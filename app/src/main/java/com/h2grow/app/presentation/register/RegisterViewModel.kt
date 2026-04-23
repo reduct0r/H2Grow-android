@@ -1,19 +1,18 @@
 package com.h2grow.app.presentation.register
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.h2grow.app.data.local.TokenManager
 import com.h2grow.app.data.remote.RetrofitClient
 import com.h2grow.app.domain.model.auth.RegisterRequest
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val tokenManager: TokenManager,
     private val retrofitClient: RetrofitClient
@@ -22,26 +21,19 @@ class RegisterViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState = _uiState.asStateFlow()
 
-    var email by mutableStateOf("")
-        private set
-    var password by mutableStateOf("")
-        private set
-    var passwordConfirm by mutableStateOf("")
-        private set
-
     fun onEmailChanged(newEmail: String) {
-        email = newEmail
+        _uiState.update { it.copy(email = newEmail) }
     }
 
     fun onPasswordChanged(newPassword: String) {
-        password = newPassword
+        _uiState.update { it.copy(password = newPassword) }
         validatePassword(newPassword)
-        validateConfirmPassword(newPassword, passwordConfirm)
+        validateConfirmPassword(newPassword, _uiState.value.passwordConfirm)
     }
 
     fun onPasswordConfirmChanged(newConfirm: String) {
-        passwordConfirm = newConfirm
-        validateConfirmPassword(password, newConfirm)
+        _uiState.update { it.copy(passwordConfirm = newConfirm) }
+        validateConfirmPassword(_uiState.value.password, newConfirm)
     }
 
     fun validatePassword(password: String) {
@@ -79,7 +71,7 @@ class RegisterViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             try {
-                val request = RegisterRequest(email, password)
+                val request = RegisterRequest(_uiState.value.email, _uiState.value.password)
                 val response = retrofitClient.authApiService.register(request)
 
                 if (response.isSuccessful) {
