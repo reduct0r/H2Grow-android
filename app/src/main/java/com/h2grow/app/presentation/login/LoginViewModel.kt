@@ -7,7 +7,9 @@ import com.h2grow.app.data.remote.RetrofitClient
 import com.h2grow.app.domain.model.auth.LoginRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -19,6 +21,9 @@ class LoginViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
+
+    private val _isLoggedIn = MutableSharedFlow<Boolean>()
+    val isLoggedIn = _isLoggedIn.asSharedFlow()
 
     fun onEmailChanged(newEmail: String) {
         _uiState.update {
@@ -60,9 +65,10 @@ class LoginViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                isSuccess = true
                             )
                         }
+
+                        _isLoggedIn.emit(true)
                     }
                 } else {
                     _uiState.update {

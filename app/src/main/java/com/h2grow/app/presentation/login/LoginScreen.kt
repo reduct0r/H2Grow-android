@@ -49,8 +49,8 @@ fun LoginRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) {
+    LaunchedEffect(Unit) {
+        viewModel.isLoggedIn.collect {
             onLoginSuccess()
         }
     }
