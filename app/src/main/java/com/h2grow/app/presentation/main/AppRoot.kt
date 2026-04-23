@@ -8,14 +8,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberNavBackStack
 import com.h2grow.app.presentation.navigation.AuthGraph
 import com.h2grow.app.presentation.navigation.LoadingScreen
-import com.h2grow.app.presentation.navigation.NoConnectionScreen
 import com.h2grow.app.presentation.navigation.Screen
 
 @Composable
-fun AppRoot() {
+fun AppEntry() {
+    val authBackStack = rememberNavBackStack(Screen.Login)
+    AppRoot(authBackStack = authBackStack)
+}
+
+@Composable
+fun AppRoot(authBackStack: NavBackStack<NavKey>) {
     val viewModel: AuthRootViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsState()
 
@@ -24,16 +31,8 @@ fun AppRoot() {
             LoadingScreen()
         }
 
-        MainUiState.NoConnection -> {
-            NoConnectionScreen(
-                onRetry = viewModel::retry
-            )
-        }
-
         MainUiState.Unauthenticated -> {
-            AuthGraph(
-                onAuthSuccess = viewModel::onLoginSuccess
-            )
+            AuthGraph(backStack = authBackStack)
         }
 
         MainUiState.Authenticated -> {

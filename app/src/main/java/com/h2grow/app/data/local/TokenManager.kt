@@ -31,6 +31,11 @@ class TokenManager @Inject constructor(
     @Volatile
     private var accessTokenCache: String? = null
 
+    val isLoggedInFlow: Flow<Boolean> = authDataStore.data
+        .map { preferences ->
+            !preferences[PreferencesKeys.JWT_ACCESS_TOKEN].isNullOrBlank()
+        }
+
     suspend fun saveTokens(accessToken: String, refreshToken: String) {
         authDataStore.edit { preferences ->
             val encryptedRefreshToken = encryptor.encrypt(refreshToken)
