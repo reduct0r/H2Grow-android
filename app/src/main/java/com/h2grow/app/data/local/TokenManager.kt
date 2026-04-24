@@ -5,8 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import com.h2grow.app.api.AuthApiService
-import com.h2grow.app.data.remote.RetrofitClient
-import com.h2grow.app.domain.model.auth.RefreshRequest
+import com.h2grow.app.data.remote.dto.auth.RefreshRequest
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

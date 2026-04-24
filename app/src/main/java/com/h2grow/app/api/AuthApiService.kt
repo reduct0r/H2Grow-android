@@ -1,13 +1,12 @@
 package com.h2grow.app.api
 
-import com.h2grow.app.domain.model.auth.AuthResponse
-import com.h2grow.app.domain.model.auth.LoginRequest
-import com.h2grow.app.domain.model.auth.LogoutRequest
-import com.h2grow.app.domain.model.auth.RefreshRequest
-import com.h2grow.app.domain.model.auth.RegisterRequest
+import com.h2grow.app.data.remote.dto.auth.AuthResponse
+import com.h2grow.app.data.remote.dto.auth.LoginRequest
+import com.h2grow.app.data.remote.dto.auth.LogoutRequest
+import com.h2grow.app.data.remote.dto.auth.RefreshRequest
+import com.h2grow.app.data.remote.dto.auth.RegisterRequest
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface AuthApiService {

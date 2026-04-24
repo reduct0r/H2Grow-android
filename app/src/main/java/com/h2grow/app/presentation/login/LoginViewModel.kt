@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.h2grow.app.data.local.TokenManager
 import com.h2grow.app.data.remote.RetrofitClient
-import com.h2grow.app.domain.model.auth.LoginRequest
+import com.h2grow.app.data.remote.dto.auth.LoginRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
