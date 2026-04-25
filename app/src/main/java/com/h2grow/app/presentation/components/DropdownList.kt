@@ -33,7 +33,7 @@ import com.h2grow.app.R
 @Composable
 fun DropdownList(
     modifier: Modifier = Modifier,
-    options: List<String>,
+    options: List<DropdownItem>,
     label: String,
     selectedOption: String,
     onOptionSelected: (String) -> Unit,
@@ -44,20 +44,25 @@ fun DropdownList(
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
-        modifier = modifier.clip(RoundedCornerShape(24.dp)),
+        modifier = modifier
+            .clip(RoundedCornerShape(24.dp))
+            .fillMaxWidth()
+        ,
         expanded = expanded,
         onExpandedChange = { expanded = !expanded }
     ) {
 
         TextField(
+            modifier = Modifier
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth(),
             value = selectedOption,
             onValueChange = {},
             readOnly = true,
             label = { Text(label) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            },
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable)
+            }
         )
 
         ExposedDropdownMenu(
@@ -67,14 +72,14 @@ fun DropdownList(
 
             options.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(item) },
+                    text = { Text(item.title) },
                     onClick = {
-                        onOptionSelected(item)
+                        onOptionSelected(item.title)
                         expanded = false
                     },
                     leadingIcon = {
                         Image(
-                            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                            painter = painterResource(id = item.iconRes),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(50.dp)
@@ -121,7 +126,11 @@ fun PreviewDropDownList() {
     var selected by remember { mutableStateOf("Первый") }
 
     DropdownList(
-        options = listOf("Первый", "Второй", "Третий"),
+        options = listOf(
+            DropdownItem(1L, "Первый"),
+            DropdownItem(2L, "Второй"),
+            DropdownItem(3L, "Третий")
+        ),
         label = "Выберите элемент",
         selectedOption = selected,
         onOptionSelected = { selected = it },
