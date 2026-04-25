@@ -1,6 +1,7 @@
 package com.h2grow.app.presentation.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.h2grow.app.R
 import com.h2grow.app.presentation.components.BottomAddButton
 import com.h2grow.app.presentation.components.DropdownList
+import com.h2grow.app.presentation.components.SmartTilesGrid
 import com.h2grow.app.presentation.login.LoginScreen
 import com.h2grow.app.presentation.login.LoginUiState
 import com.h2grow.app.presentation.login.LoginViewModel
@@ -46,36 +48,44 @@ fun HomeScreen(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(paddingValues),
-            horizontalArrangement = Arrangement.Center
         ) {
-            uiState.homesList?.let {
-                DropdownList(
-                    modifier = Modifier.padding(12.dp),
-                    options = it,
-                    label = stringResource(R.string.select_home),
-                    selectedOption = uiState.selectedHome?.title ?: "No any home selected",
-                    onOptionSelected = { },
-                    onAddClick = { },
-                    bottomContent = null
-                )
-            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(paddingValues),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                uiState.homesList?.let {
+                    DropdownList(
+                        modifier = Modifier.padding(12.dp),
+                        options = it,
+                        label = stringResource(R.string.select_home),
+                        selectedOption = uiState.selectedHome?.title ?: "No any home selected",
+                        onOptionSelected = { },
+                        onAddClick = { },
+                        bottomContent = null
+                    )
+                }
 
-            if (uiState.homesList == null) {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp)
-                        .height(50.dp),
-                    onClick = { },
-                ) {
-                    Text(stringResource(R.string.add_home), fontSize = 16.sp)
+                if (uiState.homesList == null) {
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                            .height(50.dp),
+                        onClick = { },
+                    ) {
+                        Text(stringResource(R.string.add_home), fontSize = 16.sp)
+                    }
                 }
             }
+
         }
+
     }
 }
 
