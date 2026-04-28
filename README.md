@@ -1,6 +1,5 @@
 # H2Grow Android
 
-**Краткое описание**
 - H2Grow - Android-клиент.
 - Сервер: [H2Grow](https://github.com/reduct0r/H2Grow)
 - Назначение: управление/мониторинг/интерактив умных устройств на базе ESP32.
