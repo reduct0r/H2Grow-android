@@ -14,4 +14,13 @@ sealed class Screen : NavKey {
 
     @Serializable
     data object Home : Screen()
+
+    @Serializable
+    data object Rooms : Screen()
+
+    @Serializable
+    data object Device : Screen()
+
+    @Serializable
+    data object Scenarios : Screen()
 }
