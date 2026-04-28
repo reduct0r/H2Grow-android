@@ -67,7 +67,7 @@ fun RoomsScreen(
     SmartHomeScreen(
         currentScreen = Screen.Rooms,
         title = "Rooms",
-        subtitle = "A minimal room screen to keep the onboarding flow moving.",
+        subtitle = "Room screen",
         onboardingStep = uiState.onboardingStep,
         onNavigate = onNavigate
     ) {
