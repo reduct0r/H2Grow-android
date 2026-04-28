@@ -1,0 +1,294 @@
+package com.h2grow.app.presentation.components
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.h2grow.app.R
+import com.h2grow.app.domain.model.components.smartTile.SmartTile
+import com.h2grow.app.domain.model.components.smartTile.TileAction
+
+@Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SmartTileItem(
+    tile: SmartTile,
+    onAction: (TileAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var multiplier by remember { mutableFloatStateOf(1f) }
+    var sliderValue by remember(tile.id) { mutableFloatStateOf(0f) }
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .aspectRatio(1.15f)
+            .padding(8.dp)
+            .clickable { onAction(TileAction.OpenDetails(tile.id)) },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        BoxWithConstraints(
+            modifier = modifier.fillMaxSize()
+        ) {
+            val scale = (maxWidth / 188.dp).coerceIn(0.62f, 1.1f)
+            val scaledPadding = 8.dp * scale
+            val contentPadding = if (scaledPadding < 4.dp) 4.dp else scaledPadding
+            val scaledIconSize = 50.dp * scale
+            val iconSize = if (scaledIconSize < 24.dp) 24.dp else scaledIconSize
+            val scaledTitleFontSize = 24.sp * scale
+            val titleFontSize = if (scaledTitleFontSize < 12.sp) 12.sp else scaledTitleFontSize
+            val scaledValueFontSize = 30.sp * scale
+            val valueFontSize = if (scaledValueFontSize < 14.sp) 14.sp else scaledValueFontSize
+            val scaledSwitchLabelFontSize = 20.sp * scale
+            val switchLabelFontSize = if (scaledSwitchLabelFontSize < 12.sp) 12.sp else scaledSwitchLabelFontSize
+
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
+                horizontalAlignment = Alignment.Start,
+            ) {
+                Row(
+                    modifier = modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    tile.icon?.let { iconId ->
+                        Icon(
+                            painter = painterResource(id = iconId),
+                            contentDescription = null,
+                            modifier = modifier.size(iconSize),
+                        )
+                    }
+
+                    val scaledTitleStartPadding = 12.dp * scale
+                    Text(
+                        text = tile.title.orEmpty(),
+                        fontSize = titleFontSize,
+                        modifier = modifier
+                            .padding(start = if (scaledTitleStartPadding < 4.dp) 4.dp else scaledTitleStartPadding)
+                            .weight(1f),
+                        softWrap = false,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                when (tile) {
+                    is SmartTile.Info -> {
+                        Column(
+                            modifier = modifier.fillMaxHeight(),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+
+                            Row(
+                                modifier = modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+
+                                val annotatedString = buildAnnotatedString {
+                                    withStyle(style = SpanStyle(fontSize = (100.sp * scale) * multiplier)) {
+                                        append(tile.value)
+                                    }
+                                    withStyle(style = SpanStyle(fontSize = (70.sp * scale) * multiplier)) {
+                                        append(" ${tile.unit}")
+                                    }
+                                }
+
+                                Text(
+                                    text = annotatedString,
+                                    modifier = modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                    softWrap = false,
+                                    maxLines = 1,
+                                    onTextLayout = { textLayoutResult ->
+                                        if (textLayoutResult.hasVisualOverflow) {
+                                            multiplier *= 0.65f
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    is SmartTile.Toggle -> {
+                        Column(
+                            modifier = modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Row(
+                                modifier = modifier
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                                ) {
+
+                                Switch(
+                                    checked  = tile.isOn,
+                                    onCheckedChange = { newValue -> onAction(
+                                        TileAction.Toggle(
+                                            tile.id,
+                                            newValue
+                                        )
+                                    ) }
+
+                                )
+
+                                Text(
+                                    modifier = modifier.padding(start = 8.dp),
+                                    text = if (tile.isOn) "On" else "Off",
+                                    fontSize = switchLabelFontSize
+                                )
+                            }
+                        }
+                    }
+
+                    is SmartTile.Dimmer -> {
+                        LaunchedEffect(tile.id, tile.value) {
+                            sliderValue = tile.value.toFloat()
+                        }
+
+                        Column(
+                            modifier = modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            Row(
+                                modifier = modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                val scaledValuePadding = 10.dp * scale
+                                Text(
+                                    modifier = modifier.padding(if (scaledValuePadding < 4.dp) 4.dp else scaledValuePadding),
+                                    text = sliderValue.toInt().toString(),
+                                    fontSize = valueFontSize
+                                )
+                                Text(
+                                    text = tile.unit,
+                                    fontSize = valueFontSize
+                                )
+                            }
+
+                            Row(
+                                modifier = modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+
+                                Slider(
+                                    value = sliderValue,
+                                    onValueChange = { newValue ->
+                                        sliderValue = newValue
+                                    },
+                                    onValueChangeFinished = {
+                                        onAction(TileAction.SetLevel(tile.id, sliderValue.toDouble()))
+                                    },
+                                    valueRange = tile.minValue.toFloat()..tile.maxValue.toFloat(),
+                                    steps = 100,
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = MaterialTheme.colorScheme.primary,
+                                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                                        inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        activeTickColor = MaterialTheme.colorScheme.primary
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewSmartTileItemInfo(){
+    SmartTileItem(
+        tile = SmartTile.Info(
+            id = "0",
+            title = "Air Temperature",
+            value = "15.2",
+            unit = "°C",
+            icon = R.drawable.ic_launcher_foreground
+        ),
+        onAction = { }
+    )
+}
+
+@Preview
+@Composable
+fun PreviewSmartTileItemToggle() {
+    SmartTileItem(
+        tile = SmartTile.Toggle(
+            id = "1",
+            title = "Light Switch",
+            isOn = false,
+            needConfirm = true,
+            icon = R.drawable.ic_launcher_background
+        ),
+        onAction = { }
+    )
+}
+
+@Preview
+@Composable
+fun PreviewSmartTileItemDimmer() {
+    SmartTileItem(
+        tile = SmartTile.Dimmer(
+            id = "1",
+            title = "Light Dimmer",
+            value = 50.0,
+            icon = R.drawable.ic_launcher_foreground,
+        ),
+        onAction = { }
+    )
+}

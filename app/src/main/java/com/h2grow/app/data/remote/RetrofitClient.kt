@@ -1,0 +1,82 @@
+package com.h2grow.app.data.remote
+
+import com.h2grow.app.api.AuthApiService
+import com.h2grow.app.data.local.TokenManager
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+
+@Singleton
+class RetrofitClient @Inject constructor(
+    private val tokenManager: TokenManager
+) {
+    companion object {
+        private const val BASE_URL = "http://10.0.2.2:8080/api/"
+    }
+
+    private val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    @Volatile
+    private var initialized = false
+
+    private fun requireTokenManager(): TokenManager {
+        check(initialized) {
+            "RetrofitClient is not initialized. Call RetrofitClient.initialize(tokenManager) first."
+        }
+        return tokenManager
+    }
+
+    // ====================== REFRESH CLIENT ======================
+    private val refreshOkHttpClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+    }
+
+    private val refreshRetrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(refreshOkHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    val refreshAuthApiService: AuthApiService by lazy {
+        refreshRetrofit.create(AuthApiService::class.java)
+    }
+
+    // ====================== MAIN CLIENT ======================
+
+    private val mainOkHttpClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .addInterceptor(AuthInterceptor(requireTokenManager()))
+            .authenticator(TokenAuthenticator(
+                tokenManager = requireTokenManager(),
+                refreshApi = refreshAuthApiService,
+                onRefreshFailed = { requireTokenManager().clearTokens() }
+            ))
+            .build()
+    }
+
+    private val mainRetrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(mainOkHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    val mainApiService: AuthApiService by lazy {
+        mainRetrofit.create(AuthApiService::class.java)
+    }
+
+    val authApiService: AuthApiService by lazy {
+        refreshRetrofit.create(AuthApiService::class.java)
+    }
+}
