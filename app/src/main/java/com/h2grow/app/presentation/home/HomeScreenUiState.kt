@@ -1,10 +1,13 @@
 package com.h2grow.app.presentation.home
 
-import com.h2grow.app.presentation.components.DropdownItem
+import com.h2grow.app.domain.model.smarthome.Home
 
 data class HomeScreenUiState(
+    val homes: List<Home> = emptyList(),
+    val selectedHome: Home? = null,
     val onboardingStep: OnboardingStep = OnboardingStep.CreateHome,
-    val isLoading: Boolean = false,
-    val selectedHome: DropdownItem? = null,
-    val homesList: List<DropdownItem>? = null
-)
+    val homeNameInput: String = ""
+) {
+    val canEditHomes: Boolean =
+        onboardingStep == OnboardingStep.CreateHome || onboardingStep == OnboardingStep.Completed
+}

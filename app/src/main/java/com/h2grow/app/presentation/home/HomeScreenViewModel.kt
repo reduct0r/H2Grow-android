@@ -1,40 +1,67 @@
 package com.h2grow.app.presentation.home
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.h2grow.app.data.local.OnboardingPreferencesRepository
+import com.h2grow.app.domain.repository.SmartHomeRepository
+import com.h2grow.app.presentation.smarthome.resolveOnboardingStep
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 @HiltViewModel
-class HomeScreenViewModel @Inject constructor(): ViewModel() {
-    private val _uiState: MutableStateFlow<HomeScreenUiState> = MutableStateFlow(HomeScreenUiState())
-    val uiState: StateFlow<HomeScreenUiState> = _uiState.asStateFlow()
+class HomeScreenViewModel @Inject constructor(
+    private val smartHomeRepository: SmartHomeRepository,
+    private val onboardingPreferencesRepository: OnboardingPreferencesRepository
+) : ViewModel() {
+    private val homeNameInput = MutableStateFlow("")
 
-    fun onboardingHomeStepCompleted() {
-        _uiState.update {
-            it.copy(
-                onboardingStep = OnboardingStep.AddRooms
-            )
+    val uiState: StateFlow<HomeScreenUiState> = combine(
+        smartHomeRepository.observeSmartHome(),
+        onboardingPreferencesRepository.isOnboardingCompletedFlow,
+        homeNameInput
+    ) { data, isOnboardingCompleted, input ->
+        val onboardingStep = resolveOnboardingStep(data, isOnboardingCompleted)
+        if (onboardingStep == OnboardingStep.Completed && !isOnboardingCompleted) {
+            onboardingPreferencesRepository.setOnboardingCompleted(true)
+        }
+
+        HomeScreenUiState(
+            homes = data.homes,
+            selectedHome = data.homes.firstOrNull { it.id == data.selectedHomeId },
+            onboardingStep = onboardingStep,
+            homeNameInput = input
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = HomeScreenUiState()
+    )
+
+    fun updateHomeNameInput(value: String) {
+        homeNameInput.value = value
+    }
+
+    fun selectHome(homeId: Long) {
+        viewModelScope.launch {
+            smartHomeRepository.selectHome(homeId)
         }
     }
 
-    fun onboardingRoomsStepCompleted() {
-        _uiState.update {
-            it.copy(
-                onboardingStep = OnboardingStep.AddDevices
-            )
-        }
-    }
+    fun createHome() {
+        viewModelScope.launch {
+            val name = uiState.value.homeNameInput.ifBlank {
+                "Home ${uiState.value.homes.size + 1}"
+            }
 
-    fun onboardingDevicesStepCompleted() {
-        _uiState.update {
-            it.copy(
-                onboardingStep = OnboardingStep.Completed
-            )
+            smartHomeRepository.createHome(name)
+            homeNameInput.update { "" }
         }
     }
 }
