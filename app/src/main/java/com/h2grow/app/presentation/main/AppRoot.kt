@@ -16,7 +16,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import com.h2grow.app.presentation.navigation.AuthGraph
 import com.h2grow.app.presentation.navigation.MainGraph
 import com.h2grow.app.presentation.navigation.Screen
-import com.h2grow.app.presentation.smarthome.PreviewFrame
 
 @Composable
 fun AppEntry() {
@@ -64,7 +63,5 @@ fun LoadingScreen() {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewLoadingScreen() {
-    PreviewFrame {
         LoadingScreen()
-    }
 }

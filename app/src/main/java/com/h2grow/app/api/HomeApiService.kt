@@ -4,6 +4,7 @@ import com.h2grow.app.data.remote.dto.home.CreateHomeRequest
 import com.h2grow.app.data.remote.dto.home.HomeAccessResponse
 import com.h2grow.app.data.remote.dto.home.HomeResponse
 import com.h2grow.app.data.remote.dto.home.UpdateHomeRequest
+import com.h2grow.app.data.remote.dto.home.UpsertHomeAccessRequest
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -30,20 +31,20 @@ interface HomeApiService {
     ): HomeResponse
 
     @DELETE("config/homes/{homeId}")
-    suspend fun deleteHome(@Path("homeId") homeId: Long): HomeResponse
+    suspend fun deleteHome(@Path("homeId") homeId: Long)
 
     // ACCESS CONTROL
 
     @GET("config/homes/{homeId}/access")
-    suspend fun getHomeAccessList(@Path("homeId") homeId: Long): HomeAccessResponse
+    suspend fun getHomeAccessList(@Path("homeId") homeId: Long): List<HomeAccessResponse>
 
     @PUT("config/homes/{homeId}/access")
     suspend fun grantHomeAccess(
         @Path("homeId") homeId: Long,
-        @Body request: CreateHomeRequest
+        @Body request: UpsertHomeAccessRequest
     ): HomeAccessResponse
 
-    @GET("config/homes/{homeId}/access/{userId}")
+    @DELETE("config/homes/{homeId}/access/{userId}")
     suspend fun removeHomeAccess(
         @Path("homeId") homeId: Long,
         @Path("userId") userId: Long

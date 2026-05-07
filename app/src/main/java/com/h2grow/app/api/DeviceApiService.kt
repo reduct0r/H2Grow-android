@@ -1,6 +1,8 @@
 package com.h2grow.app.api
 
 import com.h2grow.app.data.remote.dto.device.CreateDeviceRequest
+import com.h2grow.app.data.remote.dto.device.DeviceCommandRequest
+import com.h2grow.app.data.remote.dto.device.DeviceCommandResponse
 import com.h2grow.app.data.remote.dto.device.DeviceResponse
 import com.h2grow.app.data.remote.dto.device.UpdateDeviceRequest
 import retrofit2.http.Body
@@ -29,4 +31,10 @@ interface DeviceApiService {
 
     @DELETE("config/devices/{deviceId}")
     suspend fun deleteDevice(@Path("deviceId") deviceId: Long)
+
+    @POST("devices/{deviceId}/commands")
+    suspend fun sendDeviceCommand(
+        @Path("deviceId") deviceId: Long,
+        @Body request: DeviceCommandRequest
+    ): DeviceCommandResponse
 }

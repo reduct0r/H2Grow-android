@@ -4,5 +4,5 @@ data class HomeAccessResponse(
     val id: Long,
     val userId: Long,
     val userEmail: String,
-    val role: String
+    val role: HomeRole
 )
