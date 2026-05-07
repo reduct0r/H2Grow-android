@@ -11,7 +11,6 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
-import java.util.UUID
 
 interface HomeApiService {
 
